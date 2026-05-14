@@ -103,46 +103,42 @@ function glow(ctx,x,y,r,color){
        LIMB DARKENING
     ===================================== */
 
-    const star =
-        ctx.createRadialGradient(
+const star =
+    ctx.createRadialGradient(
 
-            x-r*0.15,
-            y-r*0.15,
-            r*0.05,
+        x,
+        y,
+        r*0.08,
 
-            x,
-            y,
-            r
-        );
-
-    star.addColorStop(
-        0,
-        "rgba(255,255,255,1)"
+        x,
+        y,
+        r
     );
 
-    star.addColorStop(
-        0.55,
-        color
-    );
+star.addColorStop(
+    0,
+    "rgba(255,255,255,0.96)"
+);
 
-    star.addColorStop(
-        1,
-        "rgba(180,200,255,0.75)"
-    );
+star.addColorStop(
+    0.45,
+    color
+);
 
-    ctx.fillStyle = star;
+star.addColorStop(
+    0.82,
+    color
+);
 
-    ctx.fillRect(
-        x-r,
-        y-r,
-        r*2,
-        r*2
-    );
-
+star.addColorStop(
+    1,
+    "rgba(255,220,160,0.12)"
+);
+   
     /* =====================================
        HOTSPOT
     ===================================== */
-
+/*
     const hotspot =
         ctx.createRadialGradient(
 
@@ -157,7 +153,7 @@ function glow(ctx,x,y,r,color){
 
     hotspot.addColorStop(
         0,
-        "rgba(255,255,255,0.16)"
+        "rgba(255,220,160,0.12)"
     );
 
     hotspot.addColorStop(
@@ -176,7 +172,7 @@ function glow(ctx,x,y,r,color){
 
     ctx.restore();
 }
-
+*/
 /* =========================================
    ORBIT LINE
 ========================================= */
@@ -354,7 +350,7 @@ function drawHeroBinary(){
     binaryCtx.beginPath();
 
     binaryCtx.strokeStyle =
-        "rgba(255,255,255,0.08)";
+        "rgba(255,220,160,0.12)";
 
     binaryCtx.lineWidth = 2;
 
@@ -387,7 +383,7 @@ function drawHeroBinary(){
             x1,
             y1,
             42,
-            "#ffee4a"
+            "#ffd84d"
         );
 
     }else{
@@ -397,7 +393,7 @@ function drawHeroBinary(){
             x1,
             y1,
             42,
-            "#ffee4a"
+            "#ffd84d"
         );
 
         glow(
@@ -414,7 +410,7 @@ function drawHeroBinary(){
     binaryCtx.beginPath();
 
     binaryCtx.strokeStyle =
-        "rgba(255,255,255,0.22)";
+        "rgba(255,220,160,0.12)";
 
     binaryCtx.lineWidth = 1.2;
 
