@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Pakawee Astronomy</title>
+
+<link rel="stylesheet"
+      href="style.css">
+
+<script src=
+"https://cdn.plot.ly/plotly-latest.min.js">
+</script>
+
+</head>
+
+<body>
+
+<div class="stars"
+     id="stars">
+</div>
+
+<!-- HERO -->
+
+<section class="hero">
+
+    <h1>PAKAWEE</h1>
+
+    <p>
+        Astronomy Portfolio • Binary Stars •
+        Light Curves • Stellar Physics
+    </p>
+
+</section>
+
+<!-- BINARY STAR -->
+
+<section class="section">
+
+    <h2>Binary Star Simulation</h2>
+
+    <canvas id="binaryCanvas"
+            width="1000"
+            height="500">
+    </canvas>
+
+</section>
+
+<!-- INCLINATION -->
+
+<section class="section">
+
+    <h2>Inclination Comparison</h2>
+
+    <div class="inclination-grid">
+
+        <div>
+            <h3>0°</h3>
+            <canvas id="inc0"
+                    width="600"
+                    height="600">
+            </canvas>
+        </div>
+
+        <div>
+            <h3>10°</h3>
+            <canvas id="inc10"
+                    width="600"
+                    height="600">
+            </canvas>
+        </div>
+
+        <div>
+            <h3>90°</h3>
+            <canvas id="inc90"
+                    width="600"
+                    height="600">
+            </canvas>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- LIGHT CURVE -->
+
+<section class="section">
+
+    <h2>Light Curve</h2>
+
+    <div id="lightcurve"></div>
+
+</section>
+
+<footer>
+
+    © 2026 Pakawee Astronomy Portfolio
+
+</footer>
+
+<script src="stars.js"></script>
+
+<script src="binary.js"></script>
+
+<script src="lightcurve.js"></script>
+
+</body>
+</html>
