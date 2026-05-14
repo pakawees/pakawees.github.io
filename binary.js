@@ -72,7 +72,7 @@ function glow(ctx,x,y,r,color){
     ctx.arc(
         x,
         y,
-        r*3,
+        r*2.2,
         0,
         Math.PI*2
     );
@@ -313,13 +313,6 @@ const binaryCtx =
     binaryCanvas.getContext("2d");
 
 function drawHeroBinary(){
-
-    binaryCtx.clearRect(
-        0,
-        0,
-        binaryCanvas.width,
-        binaryCanvas.height
-    );
 
     const cx =
         binaryCanvas.width/2;
