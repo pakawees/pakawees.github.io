@@ -30,18 +30,12 @@ const systems = [
 let phaseAngle = 0;
 
 /* =========================================
-   LIMB DARKENED STAR
-========================================= */
-
-/* =========================================
-   LIMB DARKENED STAR
+   STAR RENDER
 ========================================= */
 
 function glow(ctx,x,y,r,color){
 
-    /* =====================================
-       OUTER HALO
-    ===================================== */
+    /* ---------- HALO ---------- */
 
     const halo =
         ctx.createRadialGradient(
@@ -56,7 +50,7 @@ function glow(ctx,x,y,r,color){
 
     halo.addColorStop(
         0,
-        "rgba(255,255,255,0.10)"
+        "rgba(255,255,255,0.08)"
     );
 
     halo.addColorStop(
@@ -83,9 +77,7 @@ function glow(ctx,x,y,r,color){
 
     ctx.fill();
 
-    /* =====================================
-       STAR DISK
-    ===================================== */
+    /* ---------- STAR DISK ---------- */
 
     ctx.save();
 
@@ -101,23 +93,19 @@ function glow(ctx,x,y,r,color){
 
     ctx.clip();
 
-    /* =====================================
-       LIMB DARKENING
-    ===================================== */
-
     const star =
         ctx.createRadialGradient(
 
             x,
             y,
-            r*0.06,
+            r*0.05,
 
             x,
             y,
             r
         );
 
-    /* ---------- CORE COLOR ---------- */
+    /* ---------- CORE ---------- */
 
     let coreColor;
 
@@ -129,31 +117,27 @@ function glow(ctx,x,y,r,color){
     }else{
 
         coreColor =
-            "rgba(255,255,255,0.98)";
+            "rgba(255,255,255,1)";
     }
-
-    /* core */
 
     star.addColorStop(
         0,
         coreColor
     );
 
-    /* photosphere */
+    /* ---------- PHOTOSPHERE ---------- */
 
     star.addColorStop(
         0.45,
         color
     );
 
-    /* outer disk */
-
     star.addColorStop(
         0.82,
         color
     );
 
-    /* limb darkening */
+    /* ---------- LIMB DARKENING ---------- */
 
     if(color === "#7fd6ff"){
 
@@ -181,6 +165,7 @@ function glow(ctx,x,y,r,color){
 
     ctx.restore();
 }
+
 /* =========================================
    ORBIT LINE
 ========================================= */
@@ -196,7 +181,7 @@ function orbitLine(
     ctx.beginPath();
 
     ctx.strokeStyle =
-        "rgba(255,255,255,0.12)";
+        "rgba(255,255,255,0.10)";
 
     ctx.lineWidth = 2;
 
@@ -245,7 +230,7 @@ function drawSystem(obj){
 
     const orbit = 65;
 
-    /* ---------- ORBIT POSITION ---------- */
+    /* ---------- POSITION ---------- */
 
     const x =
         Math.cos(phaseAngle)
@@ -270,7 +255,7 @@ function drawSystem(obj){
         inc
     );
 
-    /* ---------- DEPTH SORTING ---------- */
+    /* ---------- DEPTH ---------- */
 
     if(y > 0){
 
@@ -311,7 +296,7 @@ function drawSystem(obj){
 }
 
 /* =========================================
-   MAIN BINARY HERO
+   HERO SYSTEM
 ========================================= */
 
 const binaryCanvas =
@@ -358,7 +343,7 @@ function drawHeroBinary(){
     binaryCtx.beginPath();
 
     binaryCtx.strokeStyle =
-        "rgba(255,255,255,0.10)";
+        "rgba(255,255,255,0.08)";
 
     binaryCtx.lineWidth = 2;
 
@@ -413,12 +398,12 @@ function drawHeroBinary(){
         );
     }
 
-    /* ---------- DIFFRACTION SPIKES ---------- */
+    /* ---------- SPIKES ---------- */
 
     binaryCtx.beginPath();
 
     binaryCtx.strokeStyle =
-        "rgba(255,255,255,0.10)";
+        "rgba(255,255,255,0.14)";
 
     binaryCtx.lineWidth = 1.2;
 
@@ -451,8 +436,6 @@ function drawHeroBinary(){
 
 function animateBinary(){
 
-    /* ---------- CLEAR HERO ---------- */
-
     binaryCtx.clearRect(
         0,
         0,
@@ -460,19 +443,13 @@ function animateBinary(){
         binaryCanvas.height
     );
 
-    /* ---------- DRAW HERO ---------- */
-
     drawHeroBinary();
-
-    /* ---------- DRAW SYSTEMS ---------- */
 
     systems.forEach(system => {
 
         drawSystem(system);
 
     });
-
-    /* ---------- SPEED ---------- */
 
     phaseAngle += 0.03;
 
