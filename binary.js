@@ -35,30 +35,43 @@ let phaseAngle = 0;
 
 function glow(ctx,x,y,r,color){
 
-    /* ---------- OUTER GLOW ---------- */
+    /* =====================================
+       OUTER HALO
+    ===================================== */
 
-    const outer =
+    const halo =
         ctx.createRadialGradient(
-            x,y,0,
-            x,y,r*3
+            x,
+            y,
+            r*0.2,
+
+            x,
+            y,
+            r*3
         );
 
-    outer.addColorStop(
+    halo.addColorStop(
         0,
         color
     );
 
-    outer.addColorStop(
+    halo.addColorStop(
+        0.25,
+        color
+    );
+
+    halo.addColorStop(
         1,
         "transparent"
     );
 
     ctx.beginPath();
 
-    ctx.fillStyle = outer;
+    ctx.fillStyle = halo;
 
     ctx.arc(
-        x,y,
+        x,
+        y,
         r*3,
         0,
         Math.PI*2
@@ -66,21 +79,23 @@ function glow(ctx,x,y,r,color){
 
     ctx.fill();
 
-    /* ---------- PHOTOSPHERE ---------- */
+    /* =====================================
+       PHOTOSPHERE + LIMB DARKENING
+    ===================================== */
 
     const star =
         ctx.createRadialGradient(
 
-            x-r*0.25,
-            y-r*0.25,
-            r*0.15,
+            x,
+            y,
+            r*0.08,
 
             x,
             y,
             r
         );
 
-    /* bright core */
+    /* stellar core */
 
     star.addColorStop(
         0,
@@ -98,7 +113,7 @@ function glow(ctx,x,y,r,color){
 
     star.addColorStop(
         1,
-        "rgba(120,140,180,0.35)"
+        "rgba(90,110,150,0.28)"
     );
 
     ctx.beginPath();
@@ -106,7 +121,8 @@ function glow(ctx,x,y,r,color){
     ctx.fillStyle = star;
 
     ctx.arc(
-        x,y,
+        x,
+        y,
         r,
         0,
         Math.PI*2
@@ -114,54 +130,45 @@ function glow(ctx,x,y,r,color){
 
     ctx.fill();
 
-    /* ---------- SPECULAR HOTSPOT ---------- */
+    /* =====================================
+       SPECULAR HOTSPOT
+    ===================================== */
 
     ctx.beginPath();
 
-    ctx.fillStyle =
-        "rgba(255,255,255,0.22)";
+    const hotspot =
+        ctx.createRadialGradient(
+
+            x-r*0.22,
+            y-r*0.22,
+            0,
+
+            x-r*0.22,
+            y-r*0.22,
+            r*0.55
+        );
+
+    hotspot.addColorStop(
+        0,
+        "rgba(255,255,255,0.42)"
+    );
+
+    hotspot.addColorStop(
+        1,
+        "transparent"
+    );
+
+    ctx.fillStyle = hotspot;
 
     ctx.arc(
-        x-r*0.2,
-        y-r*0.2,
-        r*0.35,
+        x-r*0.22,
+        y-r*0.22,
+        r*0.55,
         0,
         Math.PI*2
     );
 
     ctx.fill();
-}
-
-/* =========================================
-   DRAW ORBIT
-========================================= */
-
-function orbitLine(
-    ctx,
-    cx,
-    cy,
-    orbit,
-    inc
-){
-
-    ctx.beginPath();
-
-    ctx.strokeStyle =
-        "rgba(255,255,255,0.12)";
-
-    ctx.lineWidth = 2;
-
-    ctx.ellipse(
-        cx,
-        cy,
-        orbit,
-        orbit*Math.cos(inc),
-        0,
-        0,
-        Math.PI*2
-    );
-
-    ctx.stroke();
 }
 
 /* =========================================
