@@ -459,11 +459,11 @@ animate();
     <div class="inclination-grid">
 
         <div>
-            <h3>0°</h3>
-            <canvas id="inc0"
+            <h3>30°</h3>
+            <canvas id="inc30"
                     width="500"
                     height="400"></canvas>
-			<h3>Face On</h3>
+			<h3>33% Inclined</h3>
         </div>
 
         <div>
@@ -493,16 +493,16 @@ animate();
     <div class="inclination-grid">
 
         <div>
-            <h3>0°</h3>
-            <canvas id="spec0"
+            <h3>30°</h3>
+            <canvas id="spec30"
                     width="360"
                     height="260"></canvas>
-	    <h3>Face On</h3>
+	    <h3>33% Inclined</h3>
         </div>
 
         <div>
             <h3>50°</h3>
-            <canvas id="spec50"
+            <canvas id="spec45"
                     width="360"
                     height="260"></canvas>
 	    <h3>50% Inclined</h3>
@@ -730,8 +730,8 @@ const systems = [
 
     {
         canvas:
-            document.getElementById("inc0"),
-        inclination:0
+            document.getElementById("inc30"),
+        inclination:30
     },
 
     {
@@ -865,8 +865,8 @@ animateInclination();
 
 let rvPhase = [];
 
-let rv0_white = [];
-let rv0_blue  = [];
+let rv30_white = [];
+let rv30_blue  = [];
 
 let rv45_white = [];
 let rv45_blue  = [];
@@ -887,17 +887,17 @@ for(let i=0;i<800;i++){
 
     /* inclination scaling */
 
-    let sin0  = Math.sin(0  * Math.PI/180);
+    let sin30  = Math.sin(30  * Math.PI/180);
     let sin45 = Math.sin(45 * Math.PI/180);
     let sin90 = Math.sin(90 * Math.PI/180);
 
     /* white star */
 
-    rv0_white.push(
-        -40 * sin0 * Math.sin(theta)
+    rv30_white.push(
+        -40 * sin30 * Math.sin(theta)
     );
 
-    rv75_white.push(
+    rv45_white.push(
         -40 * sin45 * Math.sin(theta)
     );
 
@@ -907,11 +907,11 @@ for(let i=0;i<800;i++){
 
     /* blue star */
 
-    rv0_blue.push(
-        70 * sin0 * Math.sin(theta)
+    rv30_blue.push(
+        70 * sin30 * Math.sin(theta)
     );
 
-    rv75_blue.push(
+    rv45_blue.push(
         70 * sin45 * Math.sin(theta)
     );
 
@@ -924,16 +924,16 @@ for(let i=0;i<800;i++){
    TRACES
 ========================================================= */
 
-/* ---------- 0 DEG ---------- */
+/* ---------- 30 DEG ---------- */
 
 const rv0White = {
 
     x:rvPhase,
-    y:rv0_white,
+    y:rv30_white,
 
     mode:'lines',
 
-    name:'White Star (0°)',
+    name:'White Star (30°)',
 
     line:{
         color:'#ffffff',
@@ -946,11 +946,11 @@ const rv0White = {
 const rv0Blue = {
 
     x:rvPhase,
-    y:rv0_blue,
+    y:rv30_blue,
 
     mode:'lines',
 
-    name:'Blue Star (0°)',
+    name:'Blue Star (30°)',
 
     line:{
         color:'#66ccff',
@@ -1083,8 +1083,8 @@ Plotly.newPlot(
 
     [
 
-        rv0White,
-        rv0Blue,
+        rv30White,
+        rv30Blue,
 
         rv45White,
         rv45Blue,
@@ -1113,8 +1113,8 @@ const specSystems = [
 
     {
         canvas:
-            document.getElementById("spec0"),
-        inclination:0
+            document.getElementById("spec30"),
+        inclination:30
     },
 
     {
