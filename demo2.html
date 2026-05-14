@@ -1209,48 +1209,81 @@ function drawSpectroscopy(obj){
     const blueShift =
         -shift;
 
-    /* ---------- WHITE STAR LINE ---------- */
+   /* =========================================================
+   ABSORPTION LINES
+========================================================= */
 
-    ctx.strokeStyle =
-        "#ffffff";
+/* ---------- WHITE STAR ABSORPTION ---------- */
 
-    ctx.lineWidth = 4;
+const whiteX =
+    center + whiteShift;
 
-    ctx.beginPath();
-
-    ctx.moveTo(
-        center + whiteShift,
-        70
+const whiteGrad =
+    ctx.createLinearGradient(
+        whiteX-10,0,
+        whiteX+10,0
     );
 
-    ctx.lineTo(
-        center + whiteShift,
-        190
+whiteGrad.addColorStop(
+    0,
+    "rgba(0,0,0,0)"
+);
+
+whiteGrad.addColorStop(
+    0.5,
+    "rgba(0,0,0,0.92)"
+);
+
+whiteGrad.addColorStop(
+    1,
+    "rgba(0,0,0,0)"
+);
+
+ctx.fillStyle =
+    whiteGrad;
+
+ctx.fillRect(
+    whiteX-10,
+    90,
+    20,
+    80
+);
+
+/* ---------- BLUE STAR ABSORPTION ---------- */
+
+const blueX =
+    center + blueShift;
+
+const blueGrad =
+    ctx.createLinearGradient(
+        blueX-12,0,
+        blueX+12,0
     );
 
-    ctx.stroke();
+blueGrad.addColorStop(
+    0,
+    "rgba(0,0,0,0)"
+);
 
-    /* ---------- BLUE STAR LINE ---------- */
+blueGrad.addColorStop(
+    0.5,
+    "rgba(0,0,0,1)"
+);
 
-    ctx.strokeStyle =
-        "#66ccff";
+blueGrad.addColorStop(
+    1,
+    "rgba(0,0,0,0)"
+);
 
-    ctx.lineWidth = 4;
+ctx.fillStyle =
+    blueGrad;
 
-    ctx.beginPath();
-
-    ctx.moveTo(
-        center + blueShift,
-        70
-    );
-
-    ctx.lineTo(
-        center + blueShift,
-        190
-    );
-
-    ctx.stroke();
-
+ctx.fillRect(
+    blueX-12,
+    90,
+    24,
+    80
+);
     /* ---------- LABELS ---------- */
 
     ctx.font =
