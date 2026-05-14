@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Rittanan | Astronomy Portfolio</title>
+<title>NARIT IS RITTANAN | Astronomy Portfolio</title>
 
 <style>
 
@@ -49,6 +49,7 @@ body{
     color:#cbdfff;
     width:70%;
     line-height:1.6;
+    
 }
 
 .inclination-grid{
@@ -59,7 +60,7 @@ body{
         repeat(auto-fit,minmax(280px,1fr));
 
     gap:30px;
-
+    overflow:visible;
     text-align:center;
 }
 
@@ -71,6 +72,7 @@ body{
         rgba(0,0,0,0.25);
 
     border-radius:20px;
+    overflow: visible;
 }
 
 .inclination-grid h3{
@@ -78,8 +80,10 @@ body{
     color:#7fd4ff;
 
     margin-bottom:15px;
+    overflow: visible;
 }
 
+    
 /* ---------------- STARS ---------------- */
 
 .stars{
@@ -169,7 +173,7 @@ footer{
 <div class="stars" id="stars"></div>
 
 <section class="hero">
-    <h1>PAKA</h1><h2>WAR</2h>
+    <h1>NARIT IS RITTANAN</h1>
 
     <p>
         Astronomy Portfolio • Binary Stars • Light Curves •
@@ -179,16 +183,49 @@ footer{
 
 <section class="section">
 
+    <h2>Projects</h2>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Binary Star Simulation</h3>
+            <p>
+                Numerical simulation and visualization
+                of eclipsing binary systems and Roche lobe interactions.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Light Curve Analysis</h3>
+            <p>
+                Analysis of photometric variability,
+                eclipses, and stellar brightness evolution.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Astrophysical Visualization</h3>
+            <p>
+                Scientific rendering of stellar systems,
+                orbital mechanics, and radiation effects.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="section">
+
     <h2>Binary Star Simulation</h2>
 
     <canvas id="binaryCanvas"
-            width="900"
-            height="500"
-            style="
-                width:100%;
-                background:rgba(0,0,0,0.2);
-                border-radius:20px;
-            ">
+        width="900"
+        height="500"
+        style="
+            width:100%;
+            background:transparent;
+        ">
     </canvas>
 <script>
 
@@ -314,21 +351,21 @@ animate();
         <div>
             <h3>0°</h3>
             <canvas id="inc0"
-                    width="320"
+                    width="360"
                     height="320"></canvas>
         </div>
 
         <div>
             <h3>75°</h3>
             <canvas id="inc75"
-                    width="320"
+                    width="360"
                     height="320"></canvas>
         </div>
 
         <div>
             <h3>90°</h3>
             <canvas id="inc90"
-                    width="320"
+                    width="360"
                     height="320"></canvas>
         </div>
 
@@ -342,39 +379,6 @@ animate();
 
     <div id="lightcurve"
          style="width:100%;height:500px;">
-    </div>
-
-</section>
-<section class="section">
-
-    <h2>Projects</h2>
-
-    <div class="cards">
-
-        <div class="card">
-            <h3>Binary Star Simulation</h3>
-            <p>
-                Numerical simulation and visualization
-                of eclipsing binary systems and Roche lobe interactions.
-            </p>
-        </div>
-
-        <div class="card">
-            <h3>Light Curve Analysis</h3>
-            <p>
-                Analysis of photometric variability,
-                eclipses, and stellar brightness evolution.
-            </p>
-        </div>
-
-        <div class="card">
-            <h3>Astrophysical Visualization</h3>
-            <p>
-                Scientific rendering of stellar systems,
-                orbital mechanics, and radiation effects.
-            </p>
-        </div>
-
     </div>
 
 </section>
