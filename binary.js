@@ -169,6 +169,142 @@ function glow(ctx,x,y,r,color){
     );
 
     ctx.fill();
+}function glow(ctx,x,y,r,color){
+
+    /* =====================================
+       OUTER HALO
+    ===================================== */
+
+    const halo =
+        ctx.createRadialGradient(
+            x,
+            y,
+            r*0.1,
+
+            x,
+            y,
+            r*2.2
+        );
+
+    halo.addColorStop(
+        0,
+        "rgba(255,255,255,0.10)"
+    );
+
+    halo.addColorStop(
+        0.25,
+        color
+    );
+
+    halo.addColorStop(
+        1,
+        "transparent"
+    );
+
+    ctx.beginPath();
+
+    ctx.fillStyle = halo;
+
+    ctx.arc(
+        x,
+        y,
+        r*2.2,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* =====================================
+       PHOTOSPHERE
+    ===================================== */
+
+    const star =
+        ctx.createRadialGradient(
+
+            x-r*0.12,
+            y-r*0.12,
+            r*0.08,
+
+            x,
+            y,
+            r
+        );
+
+    /* core */
+
+    star.addColorStop(
+        0,
+        "rgba(255,255,255,0.96)"
+    );
+
+    /* photosphere */
+
+    star.addColorStop(
+        0.55,
+        color
+    );
+
+    /* soft limb darkening */
+
+    star.addColorStop(
+        1,
+        "rgba(170,190,255,0.55)"
+    );
+
+    ctx.beginPath();
+
+    ctx.fillStyle = star;
+
+    ctx.arc(
+        x,
+        y,
+        r,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* =====================================
+       HOTSPOT
+    ===================================== */
+
+    const hotspot =
+        ctx.createRadialGradient(
+
+            x-r*0.18,
+            y-r*0.18,
+            0,
+
+            x-r*0.18,
+            y-r*0.18,
+            r*0.45
+        );
+
+    hotspot.addColorStop(
+        0,
+        "rgba(255,255,255,0.18)"
+    );
+
+    hotspot.addColorStop(
+        1,
+        "transparent"
+    );
+
+    ctx.beginPath();
+
+    ctx.fillStyle = hotspot;
+
+    ctx.arc(
+        x-r*0.18,
+        y-r*0.18,
+        r*0.45,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
 }
 
 /* =========================================
@@ -269,7 +405,7 @@ function drawSystem(obj){
             x2,
             y2,
             18,
-            "#66ccff"
+            "#7fd6ff"
         );
 
         glow(
@@ -277,7 +413,7 @@ function drawSystem(obj){
             x1,
             y1,
             30,
-            "#ffffff"
+            "#ffee4a"
         );
 
     }else{
@@ -287,7 +423,7 @@ function drawSystem(obj){
             x1,
             y1,
             30,
-            "#ffffff"
+            "#ffee4a"
         );
 
         glow(
@@ -295,7 +431,7 @@ function drawSystem(obj){
             x2,
             y2,
             18,
-            "#66ccff"
+            "#7fd6ff"
         );
     }
 }
@@ -373,7 +509,7 @@ function drawHeroBinary(){
             x2,
             y2,
             24,
-            "#66ccff"
+            "#7fd6ff"
         );
 
         glow(
@@ -381,7 +517,7 @@ function drawHeroBinary(){
             x1,
             y1,
             42,
-            "#ffffff"
+            "#ffee4a"
         );
 
     }else{
@@ -391,7 +527,7 @@ function drawHeroBinary(){
             x1,
             y1,
             42,
-            "#ffffff"
+            "#ffee4a"
         );
 
         glow(
@@ -399,7 +535,7 @@ function drawHeroBinary(){
             x2,
             y2,
             24,
-            "#66ccff"
+            "#7fd6ff"
         );
     }
 
