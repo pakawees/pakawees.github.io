@@ -391,24 +391,18 @@ animate();
 
 /* ---------- GENERATE STARS ---------- */
 
-const starsContainer =
-    document.getElementById("stars");
+const starsContainer = document.getElementById("stars");
 
 for(let i=0;i<300;i++){
 
-    const star =
-        document.createElement("div");
+    const star = document.createElement("div");
 
     star.classList.add("star");
 
-    star.style.left =
-        Math.random()*100 + "%";
+    star.style.left = Math.random()*100 + "%";
+    star.style.top = Math.random()*100 + "%";
 
-    star.style.top =
-        Math.random()*100 + "%";
-
-    star.style.opacity =
-        Math.random();
+    star.style.opacity = Math.random();
 
     star.style.animationDuration =
         (Math.random()*5+2)+"s";
@@ -417,10 +411,9 @@ for(let i=0;i<300;i++){
 }
 
 </script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
-<script src=
-"https://cdn.plot.ly/plotly-2.35.2.min.js">
-</script>
+<script>
 
 /* ---------- LIGHT CURVE DATA ---------- */
 
@@ -443,7 +436,7 @@ for(let i=0;i<500;i++){
     brightness.push(y);
 }
 
-/* ---------- PLOT ---------- */
+/* ---------- LIGHT CURVE TRACE ---------- */
 
 const trace = {
 
@@ -455,9 +448,12 @@ const trace = {
     line:{
         color:'#66ccff',
         width:3
-    }
+    },
 
+    name:'Light Curve'
 };
+
+/* ---------- LAYOUT ---------- */
 
 const layout = {
 
@@ -470,33 +466,125 @@ const layout = {
 
     xaxis:{
         title:'Orbital Phase',
-        gridcolor:'rgba(255,255,255,0.1)'
+        gridcolor:'rgba(255,255,255,0.1)',
+        zeroline:false
     },
 
     yaxis:{
         title:'Relative Brightness',
-        gridcolor:'rgba(255,255,255,0.1)'
+        gridcolor:'rgba(255,255,255,0.1)',
+        range:[0.55,1.05]
     },
 
     margin:{
         t:30
+    },
+
+    /* ---------- ECLIPSE REGIONS ---------- */
+
+    shapes:[
+
+        /* PRIMARY */
+
+        {
+            type:'rect',
+            x0:0.42,
+            x1:0.58,
+            y0:0,
+            y1:1.1,
+
+            fillcolor:'rgba(255,255,255,0.08)',
+            line:{
+                width:0
+            }
+        },
+
+        /* SECONDARY */
+
+        {
+            type:'rect',
+            x0:1.40,
+            x1:1.60,
+            y0:0,
+            y1:1.1,
+
+            fillcolor:'rgba(102,204,255,0.08)',
+            line:{
+                width:0
+            }
+        }
+
+    ],
+
+/* ---------- LABELS ---------- */
+
+annotations:[
+
+    {
+
+        x:0.5,
+        y:0.63,
+
+        text:
+            '<b>PRIMARY ECLIPSE</b><br>' +
+            'White star eclipses blue star',
+
+        showarrow:true,
+        arrowhead:2,
+        ax:0,
+        ay:-60,
+
+        font:{
+            color:'#ffffff',
+            size:14
+        }
+
+    },
+
+    {
+
+        x:1.5,
+        y:0.83,
+
+        text:
+            '<b>SECONDARY ECLIPSE</b><br>' +
+            'Blue star eclipses white star',
+
+        showarrow:true,
+        arrowhead:2,
+        ax:0,
+        ay:-60,
+
+        font:{
+            color:'#66ccff',
+            size:14
+        }
+
     }
+
+]
 
 };
 
+/* ---------- PLOT ---------- */
+
 Plotly.newPlot(
+
     'lightcurve',
+
     [trace],
+
     layout,
+
     {
         responsive:true
     }
+
 );
 
-</script>   
+</script>
 
 <script>
-
 /* ---------- INCLINATION SYSTEM ---------- */
 
 const systems = [
