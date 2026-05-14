@@ -156,12 +156,17 @@ function glow(ctx,x,y,r,color){
 
     ctx.fillStyle = star;
 
-    ctx.fillRect(
-        x-r,
-        y-r,
-        r*2,
-        r*2
+    ctx.beginPath();
+
+    ctx.arc(
+       x,
+       y,
+       r,
+       0,
+       Math.PI*2
     );
+
+ctx.fill();
 
     ctx.restore();
 }
