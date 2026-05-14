@@ -51,6 +51,35 @@ body{
     line-height:1.6;
 }
 
+.inclination-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(280px,1fr));
+
+    gap:30px;
+
+    text-align:center;
+}
+
+.inclination-grid canvas{
+
+    width:100%;
+
+    background:
+        rgba(0,0,0,0.25);
+
+    border-radius:20px;
+}
+
+.inclination-grid h3{
+
+    color:#7fd4ff;
+
+    margin-bottom:15px;
+}
+
 /* ---------------- STARS ---------------- */
 
 .stars{
@@ -275,6 +304,37 @@ animate();
 
 </script>
 </section>
+
+<section class="section">
+
+    <h2>Inclination Comparison</h2>
+
+    <div class="inclination-grid">
+
+        <div>
+            <h3>0°</h3>
+            <canvas id="inc0"
+                    width="320"
+                    height="320"></canvas>
+        </div>
+
+        <div>
+            <h3>10°</h3>
+            <canvas id="inc10"
+                    width="320"
+                    height="320"></canvas>
+        </div>
+
+        <div>
+            <h3>90°</h3>
+            <canvas id="inc90"
+                    width="320"
+                    height="320"></canvas>
+        </div>
+
+    </div>
+
+</section>
     
 <section class="section">
 
@@ -421,6 +481,143 @@ Plotly.newPlot(
     }
 );
 
-</script>    
+</script>   
+
+<script>
+
+/* ---------- INCLINATION SYSTEM ---------- */
+
+const systems = [
+
+    {
+        canvas:
+            document.getElementById("inc0"),
+        inclination:0
+    },
+
+    {
+        canvas:
+            document.getElementById("inc10"),
+        inclination:10
+    },
+
+    {
+        canvas:
+            document.getElementById("inc90"),
+        inclination:90
+    }
+
+];
+
+let phaseAngle = 0;
+
+/* ---------- DRAW STAR ---------- */
+
+function glow(ctx,x,y,r,color){
+
+    const g =
+        ctx.createRadialGradient(
+            x,y,0,
+            x,y,r*3
+        );
+
+    g.addColorStop(0,color);
+    g.addColorStop(1,"transparent");
+
+    ctx.beginPath();
+    ctx.fillStyle = g;
+    ctx.arc(x,y,r*3,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fill();
+}
+
+/* ---------- DRAW SYSTEM ---------- */
+
+function drawSystem(obj){
+
+    const canvas = obj.canvas;
+    const ctx =
+        canvas.getContext("2d");
+
+    const inc =
+        obj.inclination *
+        Math.PI/180;
+
+    ctx.clearRect(
+        0,0,
+        canvas.width,
+        canvas.height
+    );
+
+    const cx = canvas.width/2;
+    const cy = canvas.height/2;
+
+    const orbit = 90;
+
+    const x =
+        Math.cos(phaseAngle)*orbit;
+
+    const y =
+        Math.sin(phaseAngle)*
+        orbit*
+        Math.cos(inc);
+
+    const x1 = cx + x;
+    const y1 = cy + y;
+
+    const x2 = cx - x;
+    const y2 = cy - y;
+
+    /* orbit */
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,0.15)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        cx,cy,
+        orbit,
+        orbit*Math.cos(inc),
+        0,0,Math.PI*2
+    );
+
+    ctx.stroke();
+
+    /* depth sorting */
+
+    if(y > 0){
+
+        glow(ctx,x2,y2,18,"#66ccff");
+        glow(ctx,x1,y1,30,"#ffffff");
+
+    }else{
+
+        glow(ctx,x1,y1,30,"#ffffff");
+        glow(ctx,x2,y2,18,"#66ccff");
+    }
+}
+
+/* ---------- ANIMATION ---------- */
+
+function animateInclination(){
+
+    systems.forEach(drawSystem);
+
+    phaseAngle += 0.01;
+
+    requestAnimationFrame(
+        animateInclination
+    );
+}
+
+animateInclination();
+
+</script>
+
 </body>
 </html>
