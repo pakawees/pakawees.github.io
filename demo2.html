@@ -157,6 +157,62 @@ body{
     line-height:1.7;
 }
 
+/* ---------------- BINARY INFO ---------------- */
+
+.binary-info{
+
+    margin-top:35px;
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:30px;
+
+    flex-wrap:wrap;
+}
+
+.star-info{
+
+    min-width:280px;
+
+    padding:20px 24px;
+
+    border-radius:18px;
+
+    background:
+        rgba(20,30,60,0.65);
+
+    border:
+        1px solid rgba(255,255,255,0.12);
+
+    backdrop-filter:blur(10px);
+
+    line-height:1.9;
+
+    box-shadow:
+        0 0 20px rgba(0,0,0,0.25);
+}
+
+.star-title{
+
+    font-size:20px;
+
+    margin-bottom:12px;
+
+    font-weight:bold;
+}
+
+.white-star .star-title{
+
+    color:#ffffff;
+}
+
+.blue-star .star-title{
+
+    color:#66ccff;
+}
+
 /* ---------------- FOOTER ---------------- */
 
 footer{
@@ -227,6 +283,49 @@ footer{
             background:transparent;
         ">
     </canvas>
+    <div class="binary-info">
+
+    <div class="star-info white-star">
+
+        <div class="star-title">
+            White Star
+        </div>
+
+        <div>
+            Radius: 2.8 R☉
+        </div>
+
+        <div>
+            Temperature: 7200 K
+        </div>
+
+        <div>
+            Spectral Type: F0 IV
+        </div>
+
+    </div>
+
+    <div class="star-info blue-star">
+
+        <div class="star-title">
+            Blue Star
+        </div>
+
+        <div>
+            Radius: 1.9 R☉
+        </div>
+
+        <div>
+            Temperature: 14500 K
+        </div>
+
+        <div>
+            Spectral Type: B5 V
+        </div>
+
+    </div>
+
+</div>
 <script>
 
 /* ---------- CANVAS ---------- */
@@ -331,25 +430,6 @@ function animate(){
     ctx.lineTo(x1,y1+60);
 
     ctx.stroke();
-/* ---------- LABELS ---------- */
-
-    ctx.font = "16px Arial";
-
-    ctx.fillStyle = "#ffffff";
-
-    ctx.fillText(
-        "White Star  |  R = 2.8 R☉  |  T = 7200 K",
-        x1 - 120,
-        y1 - 70
-    );
-
-    ctx.fillStyle = "#66ccff";
-
-    ctx.fillText(
-        "Blue Star  |  R = 1.9 R☉  |  T = 14500 K",
-        x2 - 120,
-        y2 + 70
-    );
     
     t += 0.01;
 
