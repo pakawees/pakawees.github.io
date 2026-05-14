@@ -33,102 +33,144 @@ let phaseAngle = 0;
    LIMB DARKENED STAR
 ========================================= */
 
-/* =====================================
-   LIMB DARKENING
-===================================== */
+/* =========================================
+   LIMB DARKENED STAR
+========================================= */
 
-const star =
-    ctx.createRadialGradient(
+function glow(ctx,x,y,r,color){
 
-        x,
-        y,
-        r*0.06,
-
-        x,
-        y,
-        r
-    );
-
-/* ---------- CORE COLOR ---------- */
-
-let coreColor;
-
-if(color === "#7fd6ff"){
-
-    /* blue star */
-
-    coreColor =
-        "rgba(210,240,255,0.98)";
-
-}else{
-
-    /* white star */
-
-    coreColor =
-        "rgba(255,255,255,0.98)";
-}
-
-/* stellar core */
-
-star.addColorStop(
-    0,
-    coreColor
-);
-
-/* photosphere */
-
-star.addColorStop(
-    0.45,
-    color
-);
-
-/* outer disk */
-
-star.addColorStop(
-    0.82,
-    color
-);
-
-/* limb darkening */
-/*
-star.addColorStop(
-    1,
-    "rgba(140,210,255,1)" */
-    /*"rgba(255,255,255,0.15)"*/ 
-);
-
-star.addColorStop(
-    1,
-    "rgba(120,190,255,0.18)"
-);
-   
     /* =====================================
-       HOTSPOT
+       OUTER HALO
     ===================================== */
-/*
-    const hotspot =
-        ctx.createRadialGradient(
 
-            x-r*0.18,
-            y-r*0.18,
+    const halo =
+        ctx.createRadialGradient(
+            x,
+            y,
             0,
 
-            x-r*0.18,
-            y-r*0.18,
-            r*0.45
+            x,
+            y,
+            r*1.8
         );
 
-    hotspot.addColorStop(
+    halo.addColorStop(
         0,
-        "rgba(255,220,160,0.12)"
+        "rgba(255,255,255,0.10)"
     );
 
-    hotspot.addColorStop(
+    halo.addColorStop(
+        0.35,
+        color
+    );
+
+    halo.addColorStop(
         1,
         "transparent"
     );
 
-    ctx.fillStyle = hotspot;
+    ctx.beginPath();
+
+    ctx.fillStyle = halo;
+
+    ctx.arc(
+        x,
+        y,
+        r*1.8,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* =====================================
+       STAR DISK
+    ===================================== */
+
+    ctx.save();
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        r,
+        0,
+        Math.PI*2
+    );
+
+    ctx.clip();
+
+    /* =====================================
+       LIMB DARKENING
+    ===================================== */
+
+    const star =
+        ctx.createRadialGradient(
+
+            x,
+            y,
+            r*0.06,
+
+            x,
+            y,
+            r
+        );
+
+    /* ---------- CORE COLOR ---------- */
+
+    let coreColor;
+
+    if(color === "#7fd6ff"){
+
+        coreColor =
+            "rgba(170,225,255,1)";
+
+    }else{
+
+        coreColor =
+            "rgba(255,255,255,0.98)";
+    }
+
+    /* core */
+
+    star.addColorStop(
+        0,
+        coreColor
+    );
+
+    /* photosphere */
+
+    star.addColorStop(
+        0.45,
+        color
+    );
+
+    /* outer disk */
+
+    star.addColorStop(
+        0.82,
+        color
+    );
+
+    /* limb darkening */
+
+    if(color === "#7fd6ff"){
+
+        star.addColorStop(
+            1,
+            "rgba(120,190,255,0.18)"
+        );
+
+    }else{
+
+        star.addColorStop(
+            1,
+            "rgba(255,255,255,0.15)"
+        );
+    }
+
+    ctx.fillStyle = star;
 
     ctx.fillRect(
         x-r,
@@ -139,7 +181,6 @@ star.addColorStop(
 
     ctx.restore();
 }
-*/
 /* =========================================
    ORBIT LINE
 ========================================= */
@@ -317,7 +358,7 @@ function drawHeroBinary(){
     binaryCtx.beginPath();
 
     binaryCtx.strokeStyle =
-        "rgba(255,220,160,0.12)";
+        "rgba(255,255,255,0.10)";
 
     binaryCtx.lineWidth = 2;
 
@@ -377,7 +418,7 @@ function drawHeroBinary(){
     binaryCtx.beginPath();
 
     binaryCtx.strokeStyle =
-        "rgba(255,220,160,0.12)";
+        "rgba(255,255,255,0.10)";
 
     binaryCtx.lineWidth = 1.2;
 
