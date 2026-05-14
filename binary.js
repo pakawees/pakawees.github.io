@@ -471,4 +471,10 @@ function animateBinary(){
     requestAnimationFrame(
         animateBinary
     );
+
+   window.onload = () => {
+
+    animateBinary();
+
+};
 }
