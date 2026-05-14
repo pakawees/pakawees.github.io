@@ -331,7 +331,26 @@ function animate(){
     ctx.lineTo(x1,y1+60);
 
     ctx.stroke();
+/* ---------- LABELS ---------- */
 
+    ctx.font = "16px Arial";
+
+    ctx.fillStyle = "#ffffff";
+
+    ctx.fillText(
+        "White Star  |  R = 2.8 R☉  |  T = 7200 K",
+        x1 - 120,
+        y1 - 70
+    );
+
+    ctx.fillStyle = "#66ccff";
+
+    ctx.fillText(
+        "Blue Star  |  R = 1.9 R☉  |  T = 14500 K",
+        x2 - 120,
+        y2 + 70
+    );
+    
     t += 0.01;
 
     requestAnimationFrame(animate);
