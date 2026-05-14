@@ -172,6 +172,38 @@ function glow(ctx,x,y,r,color){
 }
 
 /* =========================================
+   ORBIT LINE
+========================================= */
+
+function orbitLine(
+    ctx,
+    cx,
+    cy,
+    orbit,
+    inc
+){
+
+    ctx.beginPath();
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,0.12)";
+
+    ctx.lineWidth = 2;
+
+    ctx.ellipse(
+        cx,
+        cy,
+        orbit,
+        orbit*Math.cos(inc),
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.stroke();
+}
+
+/* =========================================
    DRAW SINGLE SYSTEM
 ========================================= */
 
@@ -416,13 +448,30 @@ function drawHeroBinary(){
 
 function animateBinary(){
 
-    drawHeroBinary();
+    /* ---------- CLEAR HERO ---------- */
 
-    systems.forEach(
-        drawSystem
+    binaryCtx.clearRect(
+        0,
+        0,
+        binaryCanvas.width,
+        binaryCanvas.height
     );
 
-    phaseAngle += 0.01;
+    /* ---------- DRAW HERO ---------- */
+
+    drawHeroBinary();
+
+    /* ---------- DRAW SYSTEMS ---------- */
+
+    systems.forEach(system => {
+
+        drawSystem(system);
+
+    });
+
+    /* ---------- SPEED ---------- */
+
+    phaseAngle += 0.03;
 
     requestAnimationFrame(
         animateBinary
