@@ -62,7 +62,6 @@ body{
     gap:30px;
     overflow:visible;
     text-align:center;
-    
 }
 
 .inclination-grid canvas{
@@ -73,10 +72,7 @@ body{
         rgba(0,0,0,0.25);
 
     border-radius:20px;
-    overflow:visible;
-    filter:
-        drop-shadow(0 0 20px #66ccff)
-        drop-shadow(0 0 50px #66ccff);
+    overflow: visible;
 }
 
 .inclination-grid h3{
@@ -84,7 +80,7 @@ body{
     color:#7fd4ff;
 
     margin-bottom:15px;
-    overflow:visible;
+    overflow: visible;
 }
 
     
@@ -244,108 +240,26 @@ let t = 0;
 
 /* ---------- DRAW STAR ---------- */
 
-<script>
+function drawGlow(x,y,r,color){
 
-function glow(ctx,x,y,r,color){
-
-    /* ---------- OUTER GLOW ---------- */
-
-    const outer =
-        ctx.createRadialGradient(
-            x,y,0,
-            x,y,r*3
-        );
-
-    outer.addColorStop(
-        0,
-        color
+    const g = ctx.createRadialGradient(
+        x,y,0,
+        x,y,r*3
     );
 
-    outer.addColorStop(
-        1,
-        "transparent"
-    );
+    g.addColorStop(0,color);
+    g.addColorStop(1,"transparent");
 
     ctx.beginPath();
-
-    ctx.fillStyle = outer;
-
-    ctx.arc(
-        x,y,
-        r*3,
-        0,
-        Math.PI*2
-    );
-
+    ctx.fillStyle = g;
+    ctx.arc(x,y,r*3,0,Math.PI*2);
     ctx.fill();
 
-    /* ---------- LIMB DARKENING ---------- */
-
-    const star =
-        ctx.createRadialGradient(
-
-            x-r*0.25,
-            y-r*0.25,
-            r*0.15,
-
-            x,
-            y,
-            r
-        );
-
-    /* bright center */
-
-    star.addColorStop(
-        0,
-        "rgba(255,255,255,1)"
-    );
-
-    /* mid photosphere */
-
-    star.addColorStop(
-        0.45,
-        color
-    );
-
-    /* darkened limb */
-
-    star.addColorStop(
-        1,
-        "rgba(120,140,180,0.35)"
-    );
-
     ctx.beginPath();
-
-    ctx.fillStyle = star;
-
-    ctx.arc(
-        x,y,
-        r,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-    /* ---------- SPECULAR CORE ---------- */
-
-    ctx.beginPath();
-
-    ctx.fillStyle =
-        "rgba(255,255,255,0.25)";
-
-    ctx.arc(
-        x-r*0.2,
-        y-r*0.2,
-        r*0.35,
-        0,
-        Math.PI*2
-    );
-
+    ctx.fillStyle = color;
+    ctx.arc(x,y,r,0,Math.PI*2);
     ctx.fill();
 }
-
-</script>
 
 /* ---------- ANIMATION ---------- */
 
@@ -646,7 +560,7 @@ function drawSystem(obj){
     const cx = canvas.width/2;
     const cy = canvas.height/2;
 
-    const orbit = 65;
+    const orbit = 90;
 
     const x =
         Math.cos(phaseAngle)*orbit;
