@@ -412,7 +412,6 @@ for(let i=0;i<300;i++){
 
 </script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script>
 
 <script>
 
@@ -517,53 +516,53 @@ const layout = {
 
     ],
 
-    /* ---------- LABELS ---------- */
+/* ---------- LABELS ---------- */
 
-    annotations:[
+annotations:[
 
-        {
+    {
 
-            x:0.5,
-            y:0.63,
+        x:0.5,
+        y:0.63,
 
-            text:
-                '<b>PRIMARY ECLIPSE</b><br>' +
-                'Blue star eclipses white star',
+        text:
+            '<b>PRIMARY ECLIPSE</b><br>' +
+            'White star eclipses blue star',
 
-            showarrow:true,
-            arrowhead:2,
-            ax:0,
-            ay:-60,
+        showarrow:true,
+        arrowhead:2,
+        ax:0,
+        ay:-60,
 
-            font:{
-                color:'#ffffff',
-                size:14
-            }
-
-        },
-
-        {
-
-            x:1.5,
-            y:0.83,
-
-            text:
-                '<b>SECONDARY ECLIPSE</b><br>' +
-                'White star eclipses blue star',
-
-            showarrow:true,
-            arrowhead:2,
-            ax:0,
-            ay:-60,
-
-            font:{
-                color:'#66ccff',
-                size:14
-            }
-
+        font:{
+            color:'#ffffff',
+            size:14
         }
 
-    ]
+    },
+
+    {
+
+        x:1.5,
+        y:0.83,
+
+        text:
+            '<b>SECONDARY ECLIPSE</b><br>' +
+            'Blue star eclipses white star',
+
+        showarrow:true,
+        arrowhead:2,
+        ax:0,
+        ay:-60,
+
+        font:{
+            color:'#66ccff',
+            size:14
+        }
+
+    }
+
+]
 
 };
 
