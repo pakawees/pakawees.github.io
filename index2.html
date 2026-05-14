@@ -391,18 +391,24 @@ animate();
 
 /* ---------- GENERATE STARS ---------- */
 
-const starsContainer = document.getElementById("stars");
+const starsContainer =
+    document.getElementById("stars");
 
 for(let i=0;i<300;i++){
 
-    const star = document.createElement("div");
+    const star =
+        document.createElement("div");
 
     star.classList.add("star");
 
-    star.style.left = Math.random()*100 + "%";
-    star.style.top = Math.random()*100 + "%";
+    star.style.left =
+        Math.random()*100 + "%";
 
-    star.style.opacity = Math.random();
+    star.style.top =
+        Math.random()*100 + "%";
+
+    star.style.opacity =
+        Math.random();
 
     star.style.animationDuration =
         (Math.random()*5+2)+"s";
@@ -411,8 +417,10 @@ for(let i=0;i<300;i++){
 }
 
 </script>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script>
+
+<script src=
+"https://cdn.plot.ly/plotly-2.35.2.min.js">
+</script>
 
 /* ---------- LIGHT CURVE DATA ---------- */
 
