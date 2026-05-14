@@ -411,13 +411,11 @@ for(let i=0;i<300;i++){
 }
 
 </script>
-/* =========================================================
-   LIGHT CURVE : ECLIPSING BINARY
-   Blue star = brighter
-   White star = dimmer
-========================================================= */
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
-/* ---------- DATA ---------- */
+<script>
+
+/* ---------- LIGHT CURVE DATA ---------- */
 
 let phase = [];
 let brightness = [];
@@ -426,15 +424,7 @@ for(let i=0;i<500;i++){
 
     let x = i/500 * 2;
 
-    /*
-       PRIMARY ECLIPSE
-       White star blocks brighter blue star
-       -> deeper minimum
-
-       SECONDARY ECLIPSE
-       Blue star blocks dimmer white star
-       -> shallower minimum
-    */
+    /* eclipsing binary style */
 
     let y =
         1
@@ -446,7 +436,7 @@ for(let i=0;i<500;i++){
     brightness.push(y);
 }
 
-/* ---------- MAIN CURVE ---------- */
+/* ---------- LIGHT CURVE TRACE ---------- */
 
 const trace = {
 
@@ -455,49 +445,12 @@ const trace = {
 
     mode:'lines',
 
-    name:'Light Curve',
-
     line:{
         color:'#66ccff',
         width:3
-    }
-
-};
-
-/* ---------- PRIMARY POINT ---------- */
-
-const primaryPoint = {
-
-    x:[0.5],
-    y:[0.65],
-
-    mode:'markers',
-
-    marker:{
-        size:9,
-        color:'#ffffff'
     },
 
-    name:'Primary Eclipse'
-
-};
-
-/* ---------- SECONDARY POINT ---------- */
-
-const secondaryPoint = {
-
-    x:[1.5],
-    y:[0.85],
-
-    mode:'markers',
-
-    marker:{
-        size:9,
-        color:'#66ccff'
-    },
-
-    name:'Secondary Eclipse'
-
+    name:'Light Curve'
 };
 
 /* ---------- LAYOUT ---------- */
@@ -512,131 +465,104 @@ const layout = {
     },
 
     xaxis:{
-
         title:'Orbital Phase',
-
         gridcolor:'rgba(255,255,255,0.1)',
-
         zeroline:false
-
     },
 
     yaxis:{
-
         title:'Relative Brightness',
-
         gridcolor:'rgba(255,255,255,0.1)',
-
         range:[0.55,1.05]
-
     },
 
     margin:{
-        t:30,
-        b:120
+        t:30
     },
 
-    showlegend:false,
-
-    /* ---------- SHADED ECLIPSE REGIONS ---------- */
+    /* ---------- ECLIPSE REGIONS ---------- */
 
     shapes:[
 
         /* PRIMARY */
 
         {
-
             type:'rect',
-
             x0:0.42,
             x1:0.58,
-
             y0:0,
             y1:1.1,
 
             fillcolor:'rgba(255,255,255,0.08)',
-
             line:{
                 width:0
             }
-
         },
 
         /* SECONDARY */
 
         {
-
             type:'rect',
-
             x0:1.40,
             x1:1.60,
-
             y0:0,
             y1:1.1,
 
             fillcolor:'rgba(102,204,255,0.08)',
-
             line:{
                 width:0
             }
-
         }
 
     ],
 
-    /* ---------- LABELS UNDER GRAPH ---------- */
+/* ---------- LABELS ---------- */
 
-    annotations:[
+annotations:[
 
-        {
+    {
 
-            x:0.25,
-            y:-0.28,
+        x:0.5,
+        y:0.63,
 
-            xref:'paper',
-            yref:'paper',
+        text:
+            '<b>PRIMARY ECLIPSE</b><br>' +
+            'White star eclipses blue star',
 
-            showarrow:false,
+        showarrow:true,
+        arrowhead:2,
+        ax:0,
+        ay:-60,
 
-            align:'center',
-
-            text:
-                '<span style="color:white;">●</span> ' +
-                '<b>PRIMARY ECLIPSE</b><br>' +
-                'White star eclipses brighter blue star',
-
-            font:{
-                size:14,
-                color:'#dcecff'
-            }
-
-        },
-
-        {
-
-            x:0.75,
-            y:-0.28,
-
-            xref:'paper',
-            yref:'paper',
-
-            showarrow:false,
-
-            align:'center',
-
-            text:
-                '<span style="color:#66ccff;">●</span> ' +
-                '<b>SECONDARY ECLIPSE</b><br>' +
-                'Blue star eclipses dimmer white star',
-
-            font:{
-                size:14,
-                color:'#dcecff'
-            }
-
+        font:{
+            color:'#ffffff',
+            size:14
         }
 
-    ]
+    },
+
+    {
+
+        x:1.5,
+        y:0.83,
+
+        text:
+            '<b>SECONDARY ECLIPSE</b><br>' +
+            'Blue star eclipses white star',
+
+        showarrow:true,
+        arrowhead:2,
+        ax:0,
+        ay:-60,
+
+        font:{
+            color:'#66ccff',
+            size:14
+        }
+
+    }
+
+]
 
 };
 
@@ -646,11 +572,7 @@ Plotly.newPlot(
 
     'lightcurve',
 
-    [
-        trace,
-        primaryPoint,
-        secondaryPoint
-    ],
+    [trace],
 
     layout,
 
