@@ -47,7 +47,7 @@ function glow(ctx,x,y,r,color){
 
             x,
             y,
-            r*2
+            r*1.8
         );
 
     halo.addColorStop(
@@ -72,7 +72,7 @@ function glow(ctx,x,y,r,color){
     ctx.arc(
         x,
         y,
-        r*2,
+        r*1.8,
         0,
         Math.PI*2
     );
@@ -80,12 +80,12 @@ function glow(ctx,x,y,r,color){
     ctx.fill();
 
     /* =====================================
-       STAR DISK
+       STELLAR DISK
     ===================================== */
 
     ctx.save();
 
-    /* clip to stellar disk */
+    /* clip to star */
 
     ctx.beginPath();
 
@@ -103,37 +103,57 @@ function glow(ctx,x,y,r,color){
        LIMB DARKENING
     ===================================== */
 
-const star =
-    ctx.createRadialGradient(
+    const star =
+        ctx.createRadialGradient(
 
-        x,
-        y,
-        r*0.08,
+            x,
+            y,
+            r*0.06,
 
-        x,
-        y,
-        r
+            x,
+            y,
+            r
+        );
+
+    /* stellar core */
+
+    star.addColorStop(
+        0,
+        "rgba(255,255,255,0.98)"
     );
 
-star.addColorStop(
-    0,
-    "rgba(255,255,255,0.96)"
-);
+    /* photosphere */
 
-star.addColorStop(
-    0.45,
-    color
-);
+    star.addColorStop(
+        0.45,
+        color
+    );
 
-star.addColorStop(
-    0.82,
-    color
-);
+    /* smooth outer disk */
 
-star.addColorStop(
-    1,
-    "rgba(255,220,160,0.12)"
-);
+    star.addColorStop(
+        0.82,
+        color
+    );
+
+    /* limb darkening */
+
+    star.addColorStop(
+        1,
+        "rgba(255,255,255,0.15)"
+    );
+
+    ctx.fillStyle = star;
+
+    ctx.fillRect(
+        x-r,
+        y-r,
+        r*2,
+        r*2
+    );
+
+    ctx.restore();
+}
    
     /* =====================================
        HOTSPOT
@@ -383,7 +403,7 @@ function drawHeroBinary(){
             x1,
             y1,
             42,
-            "#ffd84d"
+            "#ffffff"
         );
 
     }else{
@@ -393,7 +413,7 @@ function drawHeroBinary(){
             x1,
             y1,
             42,
-            "#ffd84d"
+            "#ffffff"
         );
 
         glow(
