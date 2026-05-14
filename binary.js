@@ -43,147 +43,11 @@ function glow(ctx,x,y,r,color){
         ctx.createRadialGradient(
             x,
             y,
-            r*0.2,
-
-            x,
-            y,
-            r*3
-        );
-
-    halo.addColorStop(
-        0,
-        color
-    );
-
-    halo.addColorStop(
-        0.25,
-        color
-    );
-
-    halo.addColorStop(
-        1,
-        "transparent"
-    );
-
-    ctx.beginPath();
-
-    ctx.fillStyle = halo;
-
-    ctx.arc(
-        x,
-        y,
-        r*2.2,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-    /* =====================================
-       PHOTOSPHERE + LIMB DARKENING
-    ===================================== */
-
-    const star =
-        ctx.createRadialGradient(
-
-            x,
-            y,
-            r*0.08,
-
-            x,
-            y,
-            r
-        );
-
-    /* stellar core */
-
-    star.addColorStop(
-        0,
-        "rgba(255,255,255,1)"
-    );
-
-    /* photosphere */
-
-    star.addColorStop(
-        0.45,
-        color
-    );
-
-    /* limb darkening */
-
-    star.addColorStop(
-        1,
-        "rgba(90,110,150,0.28)"
-    );
-
-    ctx.beginPath();
-
-    ctx.fillStyle = star;
-
-    ctx.arc(
-        x,
-        y,
-        r,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-    /* =====================================
-       SPECULAR HOTSPOT
-    ===================================== */
-
-    ctx.beginPath();
-
-    const hotspot =
-        ctx.createRadialGradient(
-
-            x-r*0.22,
-            y-r*0.22,
             0,
 
-            x-r*0.22,
-            y-r*0.22,
-            r*0.55
-        );
-
-    hotspot.addColorStop(
-        0,
-        "rgba(255,255,255,0.42)"
-    );
-
-    hotspot.addColorStop(
-        1,
-        "transparent"
-    );
-
-    ctx.fillStyle = hotspot;
-
-    ctx.arc(
-        x-r*0.22,
-        y-r*0.22,
-        r*0.55,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-}function glow(ctx,x,y,r,color){
-
-    /* =====================================
-       OUTER HALO
-    ===================================== */
-
-    const halo =
-        ctx.createRadialGradient(
             x,
             y,
-            r*0.1,
-
-            x,
-            y,
-            r*2.2
+            r*2
         );
 
     halo.addColorStop(
@@ -192,7 +56,7 @@ function glow(ctx,x,y,r,color){
     );
 
     halo.addColorStop(
-        0.25,
+        0.35,
         color
     );
 
@@ -208,7 +72,7 @@ function glow(ctx,x,y,r,color){
     ctx.arc(
         x,
         y,
-        r*2.2,
+        r*2,
         0,
         Math.PI*2
     );
@@ -216,45 +80,14 @@ function glow(ctx,x,y,r,color){
     ctx.fill();
 
     /* =====================================
-       PHOTOSPHERE
+       STAR DISK
     ===================================== */
 
-    const star =
-        ctx.createRadialGradient(
+    ctx.save();
 
-            x-r*0.12,
-            y-r*0.12,
-            r*0.08,
-
-            x,
-            y,
-            r
-        );
-
-    /* core */
-
-    star.addColorStop(
-        0,
-        "rgba(255,255,255,0.96)"
-    );
-
-    /* photosphere */
-
-    star.addColorStop(
-        0.55,
-        color
-    );
-
-    /* soft limb darkening */
-
-    star.addColorStop(
-        1,
-        "rgba(170,190,255,0.55)"
-    );
+    /* clip to stellar disk */
 
     ctx.beginPath();
-
-    ctx.fillStyle = star;
 
     ctx.arc(
         x,
@@ -264,7 +97,47 @@ function glow(ctx,x,y,r,color){
         Math.PI*2
     );
 
-    ctx.fill();
+    ctx.clip();
+
+    /* =====================================
+       LIMB DARKENING
+    ===================================== */
+
+    const star =
+        ctx.createRadialGradient(
+
+            x-r*0.15,
+            y-r*0.15,
+            r*0.05,
+
+            x,
+            y,
+            r
+        );
+
+    star.addColorStop(
+        0,
+        "rgba(255,255,255,1)"
+    );
+
+    star.addColorStop(
+        0.55,
+        color
+    );
+
+    star.addColorStop(
+        1,
+        "rgba(180,200,255,0.75)"
+    );
+
+    ctx.fillStyle = star;
+
+    ctx.fillRect(
+        x-r,
+        y-r,
+        r*2,
+        r*2
+    );
 
     /* =====================================
        HOTSPOT
@@ -284,7 +157,7 @@ function glow(ctx,x,y,r,color){
 
     hotspot.addColorStop(
         0,
-        "rgba(255,255,255,0.18)"
+        "rgba(255,255,255,0.16)"
     );
 
     hotspot.addColorStop(
@@ -292,19 +165,16 @@ function glow(ctx,x,y,r,color){
         "transparent"
     );
 
-    ctx.beginPath();
-
     ctx.fillStyle = hotspot;
 
-    ctx.arc(
-        x-r*0.18,
-        y-r*0.18,
-        r*0.45,
-        0,
-        Math.PI*2
+    ctx.fillRect(
+        x-r,
+        y-r,
+        r*2,
+        r*2
     );
 
-    ctx.fill();
+    ctx.restore();
 }
 
 /* =========================================
