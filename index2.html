@@ -389,294 +389,100 @@ animate();
 
 <script>
 
-/* =========================================
-   ECLIPSING BINARY LIGHT CURVE
-========================================= */
+/* ---------- GENERATE STARS ---------- */
 
-const phase = [];
-const brightness = [];
+const starsContainer = document.getElementById("stars");
 
-/* =========================================
-   PARAMETERS
-========================================= */
+for(let i=0;i<300;i++){
 
-const N = 1200;
+    const star = document.createElement("div");
 
-/* eclipse depths */
+    star.classList.add("star");
 
-const primaryDepth = 0.42;
-const secondaryDepth = 0.18;
+    star.style.left = Math.random()*100 + "%";
+    star.style.top = Math.random()*100 + "%";
 
-/* eclipse widths */
+    star.style.opacity = Math.random();
 
-const primaryWidth = 0.035;
-const secondaryWidth = 0.060;
+    star.style.animationDuration =
+        (Math.random()*5+2)+"s";
 
-/* ellipsoidal variation */
-
-const ellipsoidalAmp = 0.035;
-
-/* reflection effect */
-
-const reflectionAmp = 0.012;
-
-/* observational noise */
-
-const noiseAmp = 0.0025;
-
-/* =========================================
-   GAUSSIAN ECLIPSE
-========================================= */
-
-function eclipse(
-    x,
-    center,
-    width,
-    depth
-){
-
-    return depth *
-        Math.exp(
-            -((x-center)**2)
-            /(2*width*width)
-        );
+    starsContainer.appendChild(star);
 }
 
-/* =========================================
-   BUILD LIGHT CURVE
-========================================= */
+</script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
 
-for(let i=0;i<N;i++){
+/* ---------- LIGHT CURVE DATA ---------- */
 
-    const p =
-        i/(N-1);
+let phase = [];
+let brightness = [];
 
-    /* duplicate phase */
+for(let i=0;i<500;i++){
 
-    const x = p * 2;
+    let x = i/500 * 2;
 
-    /* ---------- BASELINE ---------- */
+    /* eclipsing binary style */
 
-    let y = 1;
-
-    /* ---------- PRIMARY ECLIPSE ---------- */
-
-    y -= eclipse(
-        x,
-        0.5,
-        primaryWidth,
-        primaryDepth
-    );
-
-    /* ---------- SECONDARY ECLIPSE ---------- */
-
-    y -= eclipse(
-        x,
-        1.5,
-        secondaryWidth,
-        secondaryDepth
-    );
-
-    /* ---------- ELLIPSOIDAL VARIATION ---------- */
-
-    y +=
-        ellipsoidalAmp *
-        Math.cos(
-            4*Math.PI*x
-        );
-
-    /* ---------- REFLECTION EFFECT ---------- */
-
-    y +=
-        reflectionAmp *
-        Math.cos(
-            2*Math.PI*x
-        );
-
-    /* ---------- SMALL STELLAR VARIABILITY ---------- */
-
-    y +=
-        0.004 *
-        Math.sin(
-            10*Math.PI*x
-        );
-
-    /* ---------- OBSERVATIONAL NOISE ---------- */
-
-    y +=
-        (Math.random()-0.5)
-        * noiseAmp;
+    let y =
+        1
+        - 0.35*Math.exp(-((x-0.5)**2)/0.003)
+        - 0.15*Math.exp(-((x-1.5)**2)/0.008)
+        + 0.02*Math.sin(8*x);
 
     phase.push(x);
-
     brightness.push(y);
 }
 
-/* =========================================
-   MAIN TRACE
-========================================= */
+/* ---------- PLOT ---------- */
 
 const trace = {
 
     x: phase,
-
     y: brightness,
 
-    mode:"lines",
+    mode:'lines',
 
     line:{
-
-        color:"#66ccff",
-
+        color:'#66ccff',
         width:3
-    },
+    }
 
-    hovertemplate:
-        "Phase: %{x:.3f}<br>" +
-        "Flux: %{y:.4f}" +
-        "<extra></extra>"
 };
-
-/* =========================================
-   ECLIPSE MARKERS
-========================================= */
-
-const primaryMarker = {
-
-    x:[0.5],
-
-    y:[1-primaryDepth],
-
-    mode:"markers+text",
-
-    text:["Primary Eclipse"],
-
-    textposition:"bottom center",
-
-    marker:{
-
-        size:10,
-
-        color:"#ffffff"
-    },
-
-    textfont:{
-
-        color:"#dcecff"
-    },
-
-    hoverinfo:"skip"
-};
-
-const secondaryMarker = {
-
-    x:[1.5],
-
-    y:[1-secondaryDepth],
-
-    mode:"markers+text",
-
-    text:["Secondary Eclipse"],
-
-    textposition:"bottom center",
-
-    marker:{
-
-        size:8,
-
-        color:"#66ccff"
-    },
-
-    textfont:{
-
-        color:"#dcecff"
-    },
-
-    hoverinfo:"skip"
-};
-
-/* =========================================
-   LAYOUT
-========================================= */
 
 const layout = {
 
-    paper_bgcolor:
-        "rgba(0,0,0,0)",
-
-    plot_bgcolor:
-        "rgba(0,0,0,0)",
+    paper_bgcolor:'rgba(0,0,0,0)',
+    plot_bgcolor:'rgba(0,0,0,0)',
 
     font:{
-
-        color:"#dcecff",
-
-        family:"Arial"
-    },
-
-    margin:{
-
-        l:70,
-        r:40,
-        t:40,
-        b:60
+        color:'#dcecff'
     },
 
     xaxis:{
-
-        title:"Orbital Phase",
-
-        range:[0,2],
-
-        gridcolor:
-            "rgba(255,255,255,0.08)",
-
-        zeroline:false
+        title:'Orbital Phase',
+        gridcolor:'rgba(255,255,255,0.1)'
     },
 
     yaxis:{
-
-        title:"Relative Brightness",
-
-        gridcolor:
-            "rgba(255,255,255,0.08)",
-
-        zeroline:false
+        title:'Relative Brightness',
+        gridcolor:'rgba(255,255,255,0.1)'
     },
 
-    showlegend:false
+    margin:{
+        t:30
+    }
+
 };
-
-/* =========================================
-   CONFIG
-========================================= */
-
-const config = {
-
-    responsive:true,
-
-    displaylogo:false,
-
-    scrollZoom:true
-};
-
-/* =========================================
-   PLOT
-========================================= */
 
 Plotly.newPlot(
-
-    "lightcurve",
-
-    [
-        trace,
-        primaryMarker,
-        secondaryMarker
-    ],
-
+    'lightcurve',
+    [trace],
     layout,
-
-    config
+    {
+        responsive:true
+    }
 );
 
 </script>   
