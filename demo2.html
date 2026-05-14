@@ -331,7 +331,26 @@ function animate(){
     ctx.lineTo(x1,y1+60);
 
     ctx.stroke();
+/* ---------- LABELS ---------- */
 
+    ctx.font = "16px Arial";
+
+    ctx.fillStyle = "#ffffff";
+
+    ctx.fillText(
+        "White Star  |  R = 2.8 R☉  |  T = 7200 K",
+        x1 - 120,
+        y1 - 70
+    );
+
+    ctx.fillStyle = "#66ccff";
+
+    ctx.fillText(
+        "Blue Star  |  R = 1.9 R☉  |  T = 14500 K",
+        x2 - 120,
+        y2 + 70
+    );
+    
     t += 0.01;
 
     requestAnimationFrame(animate);
@@ -523,16 +542,12 @@ annotations:[
     {
 
         x:0.5,
-        y:0.63,
-
+        y:0.6,
         text:
+            '<span style="color:white;">●</span> ' +
             '<b>PRIMARY ECLIPSE</b><br>' +
             'White star eclipses blue star',
-
-        showarrow:true,
-        arrowhead:2,
-        ax:0,
-        ay:-60,
+         showarrow:false,
 
         font:{
             color:'#ffffff',
@@ -544,16 +559,14 @@ annotations:[
     {
 
         x:1.5,
-        y:0.83,
+        y:0.8,
 
         text:
+            '<span style="color:#66ccff;">●</span> ' +
             '<b>SECONDARY ECLIPSE</b><br>' +
             'Blue star eclipses white star',
 
-        showarrow:true,
-        arrowhead:2,
-        ax:0,
-        ay:-60,
+        showarrow:false,
 
         font:{
             color:'#66ccff',
