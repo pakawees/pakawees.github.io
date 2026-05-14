@@ -477,8 +477,7 @@ const layout = {
     },
 
     margin:{
-        t:30,
-        b:120
+        t:30
     },
 
     /* ---------- ECLIPSE REGIONS ---------- */
@@ -523,23 +522,17 @@ annotations:[
 
     {
 
-        x:0.25,
-        y:-0.28,
-
-        xref:'paper',
-        yref:'paper',
-
-        showarrow:false,
-
-        align:'center',
+        x:0.5,
+        y:0.63,
 
         text:
-            '<span style="color:white;">●</span> ' +
             '<b>PRIMARY ECLIPSE</b><br>' +
             'White star eclipses blue star',
 
+         showarrow:false,
+
         font:{
-            color:'#dcecff',
+            color:'#ffffff',
             size:14
         }
 
@@ -547,30 +540,24 @@ annotations:[
 
     {
 
-        x:0.75,
-        y:-0.28,
-
-        xref:'paper',
-        yref:'paper',
-
-        showarrow:false,
-
-        align:'center',
+        x:1.5,
+        y:0.83,
 
         text:
-            '<span style="color:#66ccff;">●</span> ' +
             '<b>SECONDARY ECLIPSE</b><br>' +
             'Blue star eclipses white star',
 
+        showarrow:false,
+
         font:{
-            color:'#dcecff',
+            color:'#66ccff',
             size:14
         }
 
     }
 
 ]
-    
+
 };
 
 /* ---------- PLOT ---------- */
