@@ -33,127 +33,74 @@ let phaseAngle = 0;
    LIMB DARKENED STAR
 ========================================= */
 
-function glow(ctx,x,y,r,color){
+/* =====================================
+   LIMB DARKENING
+===================================== */
 
-    /* =====================================
-       OUTER HALO
-    ===================================== */
+const star =
+    ctx.createRadialGradient(
 
-    const halo =
-        ctx.createRadialGradient(
-            x,
-            y,
-            0,
-
-            x,
-            y,
-            r*1.8
-        );
-
-    halo.addColorStop(
-        0,
-        "rgba(255,255,255,0.10)"
-    );
-
-    halo.addColorStop(
-        0.35,
-        color
-    );
-
-    halo.addColorStop(
-        1,
-        "transparent"
-    );
-
-    ctx.beginPath();
-
-    ctx.fillStyle = halo;
-
-    ctx.arc(
         x,
         y,
-        r*1.8,
-        0,
-        Math.PI*2
-    );
+        r*0.06,
 
-    ctx.fill();
-
-    /* =====================================
-       STELLAR DISK
-    ===================================== */
-
-    ctx.save();
-
-    /* clip to star */
-
-    ctx.beginPath();
-
-    ctx.arc(
         x,
         y,
-        r,
-        0,
-        Math.PI*2
+        r
     );
 
-    ctx.clip();
+/* ---------- CORE COLOR ---------- */
 
-    /* =====================================
-       LIMB DARKENING
-    ===================================== */
+let coreColor;
 
-    const star =
-        ctx.createRadialGradient(
+if(color === "#7fd6ff"){
 
-            x,
-            y,
-            r*0.06,
+    /* blue star */
 
-            x,
-            y,
-            r
-        );
+    coreColor =
+        "rgba(210,240,255,0.98)";
 
-    /* stellar core */
+}else{
 
-    star.addColorStop(
-        0,
-        "rgba(255,255,255,0.98)"
-    );
+    /* white star */
 
-    /* photosphere */
-
-    star.addColorStop(
-        0.45,
-        color
-    );
-
-    /* smooth outer disk */
-
-    star.addColorStop(
-        0.82,
-        color
-    );
-
-    /* limb darkening */
-
-    star.addColorStop(
-        1,
-        "rgba(255,255,255,0.15)"
-    );
-
-    ctx.fillStyle = star;
-
-    ctx.fillRect(
-        x-r,
-        y-r,
-        r*2,
-        r*2
-    );
-
-    ctx.restore();
+    coreColor =
+        "rgba(255,255,255,0.98)";
 }
+
+/* stellar core */
+
+star.addColorStop(
+    0,
+    coreColor
+);
+
+/* photosphere */
+
+star.addColorStop(
+    0.45,
+    color
+);
+
+/* outer disk */
+
+star.addColorStop(
+    0.82,
+    color
+);
+
+/* limb darkening */
+/*
+star.addColorStop(
+    1,
+    "rgba(140,210,255,1)" */
+    /*"rgba(255,255,255,0.15)"*/ 
+);
+
+star.addColorStop(
+    1,
+    "rgba(120,190,255,0.18)"
+);
    
     /* =====================================
        HOTSPOT
@@ -299,7 +246,7 @@ function drawSystem(obj){
             x1,
             y1,
             30,
-            "#ffee4a"
+            "#ffffff"
         );
 
     }else{
@@ -309,7 +256,7 @@ function drawSystem(obj){
             x1,
             y1,
             30,
-            "#ffee4a"
+            "#ffffff"
         );
 
         glow(
