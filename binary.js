@@ -304,8 +304,13 @@ const binaryCanvas =
         "binaryCanvas"
     );
 
-const binaryCtx =
-    binaryCanvas.getContext("2d");
+let binaryCtx = null;
+
+if(binaryCanvas){
+
+    binaryCtx =
+        binaryCanvas.getContext("2d");
+}
 
 function drawHeroBinary(){
 
@@ -434,7 +439,12 @@ function drawHeroBinary(){
    MAIN LOOP
 ========================================= */
 
+
 function animateBinary(){
+
+    if(!binaryCtx) return;
+
+    /* ---------- CLEAR HERO ---------- */
 
     binaryCtx.clearRect(
         0,
@@ -457,5 +467,3 @@ function animateBinary(){
         animateBinary
     );
 }
-
-animateBinary();
