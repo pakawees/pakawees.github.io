@@ -482,6 +482,35 @@ animate();
     </div>
 
 </section>
+
+<section class="section">
+
+    <h2>Doppler Spectroscopy</h2>
+
+    <div class="inclination-grid">
+
+        <div>
+            <h3>0°</h3>
+            <canvas id="spec0"
+                    width="360"
+                    height="260"></canvas>
+        </div>
+
+        <div>
+            <h3>75°</h3>
+            <canvas id="spec75"
+                    width="360"
+                    height="260"></canvas>
+        </div>
+
+        <div>
+            <h3>90°</h3>
+            <canvas id="spec90"
+                    width="360"
+                    height="260"></canvas>
+        </div>
+    </div>
+</section>
     
 <section class="section">
 
@@ -1066,6 +1095,219 @@ Plotly.newPlot(
     }
 
 );
+
+</script>
+<script>
+
+/* =========================================================
+   DOPPLER SPECTROSCOPY ANIMATION
+========================================================= */
+
+const specSystems = [
+
+    {
+        canvas:
+            document.getElementById("spec0"),
+        inclination:0
+    },
+
+    {
+        canvas:
+            document.getElementById("spec75"),
+        inclination:75
+    },
+
+    {
+        canvas:
+            document.getElementById("spec90"),
+        inclination:90
+    }
+
+];
+
+/* ---------- DRAW PANEL ---------- */
+
+function drawSpectroscopy(obj){
+
+    const canvas = obj.canvas;
+
+    const ctx =
+        canvas.getContext("2d");
+
+    const inc =
+        obj.inclination *
+        Math.PI/180;
+
+    ctx.clearRect(
+        0,0,
+        canvas.width,
+        canvas.height
+    );
+
+    /* ---------- BACKGROUND ---------- */
+
+    ctx.fillStyle =
+        "rgba(0,0,0,0.15)";
+
+    ctx.fillRect(
+        0,0,
+        canvas.width,
+        canvas.height
+    );
+
+    /* ---------- SPECTRUM BAR ---------- */
+
+    const grad =
+        ctx.createLinearGradient(
+            40,0,
+            canvas.width-40,0
+        );
+
+    grad.addColorStop(0,"#2244ff");
+    grad.addColorStop(0.25,"#33bbff");
+    grad.addColorStop(0.5,"#ffffff");
+    grad.addColorStop(0.75,"#ff9955");
+    grad.addColorStop(1,"#ff3333");
+
+    ctx.fillStyle = grad;
+
+    ctx.fillRect(
+        40,
+        90,
+        canvas.width-80,
+        80
+    );
+
+    /* ---------- REST LINE ---------- */
+
+    const center =
+        canvas.width/2;
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,0.35)";
+
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+
+    ctx.moveTo(center,70);
+    ctx.lineTo(center,190);
+
+    ctx.stroke();
+
+    /* ---------- DOPPLER SHIFT ---------- */
+
+    const amp =
+        55 * Math.sin(inc);
+
+    const shift =
+        Math.sin(phaseAngle) * amp;
+
+    const whiteShift =
+        shift * 0.6;
+
+    const blueShift =
+        -shift;
+
+    /* ---------- WHITE STAR LINE ---------- */
+
+    ctx.strokeStyle =
+        "#ffffff";
+
+    ctx.lineWidth = 4;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        center + whiteShift,
+        70
+    );
+
+    ctx.lineTo(
+        center + whiteShift,
+        190
+    );
+
+    ctx.stroke();
+
+    /* ---------- BLUE STAR LINE ---------- */
+
+    ctx.strokeStyle =
+        "#66ccff";
+
+    ctx.lineWidth = 4;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        center + blueShift,
+        70
+    );
+
+    ctx.lineTo(
+        center + blueShift,
+        190
+    );
+
+    ctx.stroke();
+
+    /* ---------- LABELS ---------- */
+
+    ctx.font =
+        "14px Arial";
+
+    ctx.fillStyle =
+        "#dcecff";
+
+    ctx.fillText(
+        "Blue Shift",
+        45,
+        220
+    );
+
+    ctx.fillText(
+        "Red Shift",
+        canvas.width-105,
+        220
+    );
+
+    /* ---------- STAR LABELS ---------- */
+
+    ctx.fillStyle =
+        "#ffffff";
+
+    ctx.fillText(
+        "White Star",
+        45,
+        35
+    );
+
+    ctx.fillStyle =
+        "#66ccff";
+
+    ctx.fillText(
+        "Blue Star",
+        canvas.width-120,
+        35
+    );
+
+}
+
+/* ---------- ANIMATION ---------- */
+
+function animateSpectroscopy(){
+
+    specSystems.forEach(
+        drawSpectroscopy
+    );
+
+    requestAnimationFrame(
+        animateSpectroscopy
+    );
+
+}
+
+animateSpectroscopy();
 
 </script>
 </body>
