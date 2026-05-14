@@ -139,13 +139,13 @@ function glow(ctx,x,y,r,color){
     const hotspot =
         ctx.createRadialGradient(
 
-            x-r*0.22,
-            y-r*0.22,
+            x-r*0.5,
+            y-r*0.5,
             0,
 
-            x-r*0.22,
-            y-r*0.22,
-            r*0.55
+            x-r*0.5,
+            y-r*0.5,
+            r*0.5
         );
 
     hotspot.addColorStop(
@@ -161,8 +161,8 @@ function glow(ctx,x,y,r,color){
     ctx.fillStyle = hotspot;
 
     ctx.arc(
-        x-r*0.22,
-        y-r*0.22,
+        x-r*0.5,
+        y-r*0.5,
         r*0.55,
         0,
         Math.PI*2
@@ -379,7 +379,7 @@ function drawHeroBinary(){
     }
 
     /* ---------- DIFFRACTION SPIKES ---------- */
-
+/*
     binaryCtx.beginPath();
 
     binaryCtx.strokeStyle =
@@ -408,7 +408,7 @@ function drawHeroBinary(){
     );
 
     binaryCtx.stroke();
-}
+} */
 
 /* =========================================
    MAIN LOOP
@@ -422,7 +422,7 @@ function animateBinary(){
         drawSystem
     );
 
-    phaseAngle += 0.01;
+    phaseAngle += 0.03;
 
     requestAnimationFrame(
         animateBinary
