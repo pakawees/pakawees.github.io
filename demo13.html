@@ -130,7 +130,7 @@
         const vW = ampWhite * Math.sin(incRad) * Math.sin(phase);
         const vB = -ampBlue * Math.sin(incRad) * Math.sin(phase);
         // --- วาด Static Labels (อยู่กับที่) ---
-        sCtx.font = "bold 13px Arial";
+        sCtx.font = "bold 15px Arial";
         
         // ชิดซ้าย: Blue
         sCtx.textAlign = "left";
@@ -149,7 +149,7 @@
             sCtx.beginPath(); sCtx.moveTo(ix, 90); sCtx.lineTo(ix, 190); sCtx.stroke();
             sCtx.fillStyle = color; sCtx.beginPath(); sCtx.arc(ix, 90, 5, 0, 7); sCtx.fill();
             
-            sCtx.font = "bold 11px Arial";
+            sCtx.font = "bold 13px Arial";
             sCtx.textAlign = "center";
             sCtx.fillStyle = color;
             sCtx.fillText(`${vel > 0 ? '+':''}${vel.toFixed(1)} km/s`, ix, 210);
@@ -158,7 +158,7 @@
         drawShift(vB, "#66ccff");
 
         sCtx.fillStyle = "rgba(0,0,0,0.6)"; sCtx.beginPath(); sCtx.roundRect(sX, 260, barW, 60, 8); sCtx.fill();
-        sCtx.textAlign = "left"; sCtx.font = "bold 13px monospace";
+        sCtx.textAlign = "left"; sCtx.font = "bold 14px monospace";
         sCtx.fillStyle = "#66ccff"; sCtx.fillText(`Blue Star (Primary):  ${vB.toFixed(2)} km/s`, sX + 15, 285);
         sCtx.fillStyle = "#ffffff"; sCtx.fillText(`White Star (Secondary): ${vW.toFixed(2)} km/s`, sX + 15, 305);
 
