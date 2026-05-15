@@ -1225,15 +1225,15 @@ function drawSpectroscopy(obj){
 
 /* ---------- BLUE CORE ---------- */
 
+	ctx.shadowBlur = 8;
+	ctx.shadowColor = "#ffffff";
+	
 	ctx.strokeStyle = "#66ccff";
 
 	ctx.beginPath();
 	ctx.moveTo(blueX, 70);
 	ctx.lineTo(blueX, 190);
 	ctx.stroke();
-
-	ctx.shadowBlur = 10;
-	ctx.shadowColor = "#ffffff";
 	
     /* ---------- LABELS ---------- */
 
