@@ -134,10 +134,28 @@
             sCtx.strokeStyle = color; sCtx.lineWidth = 3;
             sCtx.beginPath(); sCtx.moveTo(ix, 90); sCtx.lineTo(ix, 190); sCtx.stroke();
             sCtx.fillStyle = color; sCtx.beginPath(); sCtx.arc(ix, 90, 5, 0, 7); sCtx.fill();
-            sCtx.font = "bold 11px Arial"; sCtx.textAlign = "center";
+            
+            sCtx.font = "bold 11px Arial";
+            if (vel < 0) {
+                // ฝั่ง Blue: ชิดซ้ายของเส้น
+                sCtx.textAlign = "right";
+                sCtx.fillText("← BLUESHIFT (Toward)", ix - 10, 80);
+            } else if (vel > 0) {
+                // ฝั่ง Red: ชิดขวาของเส้น
+                sCtx.textAlign = "left";
+                sCtx.fillText("REDSHIFT (Away) →", ix + 10, 80);
+            } else {
+                // กรณีเป็น 0
+                sCtx.textAlign = "center";
+                sCtx.fillText("REST FRAME", ix, 80);
+            }
+
+            sCtx.font = "bold 11px Arial";
+            sCtx.textAlign = "center";
             sCtx.fillText(`${vel > 0 ? '+':''}${vel.toFixed(1)} km/s`, ix, 210);
         };
-        drawShift(vW, "#fff"); drawShift(vB, "#66ccff");
+        drawShift(vW, "#fff"); 
+        drawShift(vB, "#66ccff");
 
         sCtx.fillStyle = "rgba(0,0,0,0.6)"; sCtx.beginPath(); sCtx.roundRect(sX, 260, barW, 60, 8); sCtx.fill();
         sCtx.textAlign = "left"; sCtx.font = "bold 13px monospace";
