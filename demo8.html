@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Sync: Orbit, Spectra & RV Markers</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: #050816;
+            color: #7fd4ff;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            width: 90%;
+            max-width: 1100px;
+            margin-top: 30px;
+            background: rgba(20, 30, 60, 0.6);
+            border: 1px solid rgba(127, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .viz-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .viz-container { grid-template-columns: 1fr; }
+        }
+
+        canvas {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(127, 212, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        h2 { margin: 0 0 10px 0; letter-spacing: 2px; text-transform: uppercase; text-align: center; color: #fff;}
+        .label { color: #8caed6; font-size: 0.9em; margin-bottom: 8px; font-weight: bold;}
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <h2>Radial Velocity Analysis Dashboard</h2>
+    
+    <div class="controls">
+        <label>Inclination: </label>
+        <input type="range" id="incRange" min="0" max="90" value="60" style="width: 200px;">
+        <span id="incValue">60°</span>
+    </div>
+
+    <div class="viz-container">
+        <!-- Orbital Configuration -->
+        <div>
+            <div class="label">Orbital Dynamics</div>
+            <canvas id="orbitCanvas" width="500" height="350"></canvas>
+        </div>
+        
+        <!-- Spectroscopy -->
+        <div>
+            <div class="label">Spectral Shift Indicators</div>
+            <canvas id="specCanvas" width="500" height="350"></canvas>
+        </div>
+    </div>
+
+    <!-- Radial Velocity Graph -->
+    <div class="label">Radial Velocity Sync (Marker Tracking)</div>
+    <div id="rvPlot" style="width:100%; height:320px;"></div>
+</div>
+
+<script>
+    const orbitCanvas = document.getElementById('orbitCanvas');
+    const specCanvas = document.getElementById('specCanvas');
+    const incRange = document.getElementById('incRange');
+    const incValue = document.getElementById('incValue');
+
+    const oCtx = orbitCanvas.getContext('2d');
+    const sCtx = specCanvas.getContext('2d');
+
+    let phase = 0;
+    let inclination = 60;
+
+    // Mass ratio factors: White star is heavier (moves less), Blue star is lighter (moves more)
+    const ampWhite = 35;
+    const ampBlue = 60;
+
+    incRange.addEventListener('input', (e) => {
+        inclination = e.target.value;
+        incValue.innerText = inclination + "°";
+        updateStaticCurves();
+    });
+
+    function drawGlow(ctx, x, y, r, color) {
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
+        g.addColorStop(0, color);
+        g.addColorStop(1, 'transparent');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(x, y, r * 3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function drawIndicator(ctx, x, yStart, yEnd, color) {
+        const overshoot = 20;
+        ctx.strokeStyle = "rgba(0,0,0,0.8)";
+        ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(x, yStart); ctx.lineTo(x, yEnd); ctx.stroke();
+        
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(x, yStart - overshoot); ctx.lineTo(x, yEnd + overshoot); ctx.stroke();
+        
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(x, yStart - overshoot, 5, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function animate() {
+        const incRad = inclination * Math.PI / 180;
+        const cx = orbitCanvas.width / 2;
+        const cy = orbitCanvas.height / 2;
+        const orbitR = 110;
+
+        oCtx.clearRect(0, 0, orbitCanvas.width, orbitCanvas.height);
+        sCtx.clearRect(0, 0, specCanvas.width, specCanvas.height);
+
+        // 1. Orbit View
+        const x = Math.cos(phase) * orbitR;
+        const y = Math.sin(phase) * orbitR * Math.cos(incRad);
+
+        oCtx.strokeStyle = "rgba(255,255,255,0.1)";
+        oCtx.beginPath();
+        oCtx.ellipse(cx, cy, orbitR, orbitR * Math.cos(incRad), 0, 0, Math.PI * 2);
+        oCtx.stroke();
+
+        // Depth sorting using Sin(phase)
+        if (Math.sin(phase) > 0) {
+            drawGlow(oCtx, cx - x, cy - y, 10, "#66ccff"); // Blue
+            drawGlow(oCtx, cx + x, cy + y, 18, "#ffffff"); // White
+        } else {
+            drawGlow(oCtx, cx + x, cy + y, 18, "#ffffff");
+            drawGlow(oCtx, cx - x, cy - y, 10, "#66ccff");
+        }
+
+        // 2. Spectroscopy View
+        const sCenter = specCanvas.width / 2;
+        const barH = 80; const barY = 120;
+        const grad = sCtx.createLinearGradient(50, 0, specCanvas.width - 50, 0);
+        grad.addColorStop(0, "#2244ff"); grad.addColorStop(0.5, "#ffffff"); grad.addColorStop(1, "#ff3333");
+        sCtx.fillStyle = grad;
+        sCtx.fillRect(50, barY, specCanvas.width - 100, barH);
+
+        const sinInc = Math.sin(incRad);
+        const shiftFactor = 80 * sinInc;
+        // Doppler Shift is based on Sin(phase)
+        const shiftW = Math.sin(phase) * shiftFactor * 0.5;
+        const shiftB = -Math.sin(phase) * shiftFactor;
+
+        drawIndicator(sCtx, sCenter + shiftW, barY, barY + barH, "#ffffff");
+        drawIndicator(sCtx, sCenter + shiftB, barY, barY + barH, "#66ccff");
+
+        // 3. Update Markers on RV Plot
+        // RV = Amplitude * sin(inclination) * sin(phase)
+        const vW = ampWhite * sinInc * Math.sin(phase);
+        const vB = -ampBlue * sinInc * Math.sin(phase);
+
+        Plotly.restyle('rvPlot', {
+            x: [[phase], [phase]],
+            y: [[vW], [vB]]
+        }, [2, 3]); // Indices of markers in the plot
+
+        phase = (phase + 0.02) % (2 * Math.PI);
+        requestAnimationFrame(animate);
+    }
+
+    function initPlot() {
+        const xVals = [];
+        for (let i = 0; i <= 100; i++) xVals.push((i / 100) * 2 * Math.PI);
+
+        // Static Curves
+        const traceW = { x: xVals, y: [], mode: 'lines', name: 'White Star', line: { color: 'rgba(255,255,255,0.3)', width: 2 } };
+        const traceB = { x: xVals, y: [], mode: 'lines', name: 'Blue Star', line: { color: 'rgba(102,204,255,0.3)', width: 2 } };
+
+        // Animated Markers
+        const markerW = { x: [0], y: [0], mode: 'markers', marker: { color: '#fff', size: 12, line: {color: '#000', width: 2} }, name: 'Current White' };
+        const markerB = { x: [0], y: [0], mode: 'markers', marker: { color: '#66ccff', size: 12, line: {color: '#000', width: 2} }, name: 'Current Blue' };
+
+        const layout = {
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'rgba(0,0,0,0.2)',
+            margin: { t: 10, b: 40, l: 50, r: 20 },
+            xaxis: { title: 'Orbital Phase (Radians)', gridcolor: '#222', range: [0, 2*Math.PI], tickvals: [0, Math.PI, 2*Math.PI], ticktext: ['0', 'π', '2π'] },
+            yaxis: { title: 'Radial Velocity (km/s)', gridcolor: '#222', range: [-70, 70] },
+            font: { color: '#7fd4ff' },
+            showlegend: false
+        };
+
+        Plotly.newPlot('rvPlot', [traceW, traceB, markerW, markerB], layout);
+        updateStaticCurves();
+    }
+
+    function updateStaticCurves() {
+        const xVals = [];
+        const yW = [];
+        const yB = [];
+        const sinInc = Math.sin(inclination * Math.PI / 180);
+
+        for (let i = 0; i <= 100; i++) {
+            let p = (i / 100) * 2 * Math.PI;
+            xVals.push(p);
+            yW.push(ampWhite * sinInc * Math.sin(p));
+            yB.push(-ampBlue * sinInc * Math.sin(p));
+        }
+
+        Plotly.restyle('rvPlot', { y: [yW, yB] }, [0, 1]);
+    }
+
+    initPlot();
+    animate();
+</script>
+
+</body>
+</html>
