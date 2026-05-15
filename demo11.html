@@ -40,13 +40,14 @@
     </div>
 
     <div class="viz-grid">
-        <div>
-            <div class="label">Radial Velocity (RV) Plot</div>
-            <div id="rvPlot" style="height:300px;"></div>
-        </div>
+        <!-- สลับฝั่งตรงนี้ -->
         <div>
             <div class="label">Photometric Light Curve</div>
             <div id="lcPlot" style="height:300px;"></div>
+        </div>
+        <div>
+            <div class="label">Radial Velocity (RV) Plot</div>
+            <div id="rvPlot" style="height:300px;"></div>
         </div>
     </div>
 </div>
@@ -134,6 +135,7 @@
         const incRad = inclination * Math.PI / 180;
         const cx = orbitCanvas.width / 2;
         const cy = orbitCanvas.height / 2;
+        const sCenter = specCanvas.width / 2;
 
         oCtx.clearRect(0, 0, orbitCanvas.width, orbitCanvas.height);
         sCtx.clearRect(0, 0, specCanvas.width, specCanvas.height);
@@ -152,57 +154,48 @@
             drawStar(oCtx, cx - x, cy - y, 14, "#66ccff", false);
         }
 
-        // --- Spectroscopy Drawing ---
-        const sCenter = specCanvas.width / 2;
-        const barH = 90, barY = 120; 
+        const barH = 90, barY = 110; 
         const barW = specCanvas.width - 120;
         
-        // 1. Legend: Top Position
         sCtx.font = "bold 13px Arial";
         sCtx.fillStyle = "#55aaff"; sCtx.textAlign = "left";
         sCtx.fillText("← BLUESHIFT (Toward)", 60, barY - 30);
         sCtx.fillStyle = "#ff5555"; sCtx.textAlign = "right";
         sCtx.fillText("REDSHIFT (Away) →", specCanvas.width - 60, barY - 30);
 
-        // 2. Spectrum Bar
         const grad = sCtx.createLinearGradient(60, 0, specCanvas.width - 60, 0);
         grad.addColorStop(0, "#1a1aff"); grad.addColorStop(0.5, "#ffffff"); grad.addColorStop(1, "#ff1a1a");
         sCtx.fillStyle = grad; sCtx.fillRect(60, barY, barW, barH);
 
-        // 3. Dynamic Indicators
         const sinInc = Math.sin(incRad);
         const vW = ampWhite * sinInc * Math.sin(phase);
         const vB = -ampBlue * sinInc * Math.sin(phase);
         drawIndicator(sCtx, sCenter + (Math.sin(phase) * 100 * sinInc * 0.5), barY, barY + barH, "#ffffff", vW);
         drawIndicator(sCtx, sCenter - (Math.sin(phase) * 100 * sinInc), barY, barY + barH, "#66ccff", vB);
 
-        // 4. Static Digital Readout Board (Bottom)
-        const boardY = barY + barH + 75;
+        const boardY = barY + barH + 65;
         sCtx.fillStyle = "rgba(0, 0, 0, 0.5)";
         sCtx.beginPath();
-        sCtx.fillRect(60, boardY - 22, barW, 60, 8);
+        sCtx.roundRect(60, boardY, barW, 60, 8);
         sCtx.fill();
         
         sCtx.font = "bold 14px monospace";
-        sCtx.textAlign = "center"; // เปลี่ยนเป็นกึ่งกลางเพื่อให้ดูเป็นระเบียบในแนวตั้ง
-
-        // บรรทัดบน: White Star
+        sCtx.textAlign = "center";
         sCtx.fillStyle = "#ffffff";
         sCtx.fillText(`White Star (Primary):   ${vW > 0 ? "+" : ""}${vW.toFixed(2)} km/s`, sCenter, boardY + 22);
-
-        // บรรทัดล่าง: Blue Star
         sCtx.fillStyle = "#66ccff";
         sCtx.fillText(`Blue Star (Secondary): ${vB > 0 ? "+" : ""}${vB.toFixed(2)} km/s`, sCenter, boardY + 45);
 
-        // --- Update Data Plots ---
         const phaseDeg = (phase * 180 / Math.PI);
         const currLight = calculateLight(phase, incRad);
+        // restyle plots based on their new positions
         Plotly.restyle('rvPlot', { x: [[phaseDeg], [phaseDeg]], y: [[vW], [vB]] }, [2, 3]);
         Plotly.restyle('lcPlot', { x: [[phaseDeg]], y: [[currLight]] }, [1]);
 
         phase = (phase + 0.02) % (2 * Math.PI);
         requestAnimationFrame(animate);
     }
+
     function initPlots() {
         const xDeg = []; for (let i = 0; i <= 360; i += 3.6) xDeg.push(i);
         const commonLayout = {
