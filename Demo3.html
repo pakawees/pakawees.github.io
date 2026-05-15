@@ -1133,6 +1133,10 @@ const specSystems = [
 
 /* ---------- DRAW PANEL ---------- */
 
+function gaussian(x, x0, sigma, A){
+    return A * Math.exp(-Math.pow(x - x0, 2) / (2 * sigma * sigma));
+}
+
 function drawSpectroscopy(obj){
 
     const canvas = obj.canvas;
@@ -1161,8 +1165,15 @@ function drawSpectroscopy(obj){
         canvas.height
     );
 
-    /* ---------- SPECTRUM BAR ---------- */
+	/* ---------- SET LAMBDA ------------ */
 
+	const lambda0 = 550; // nm (mid-spectrum)
+	const c = 299792.458; // km/s
+	const v = Math.sin(phaseAngle) * 80; // km/s
+	const deltaLambda = lambda0 * (v / c);
+
+    /* ---------- SPECTRUM BAR ---------- */
+	
     const grad =
         ctx.createLinearGradient(
             40,0,
@@ -1183,6 +1194,51 @@ function drawSpectroscopy(obj){
         canvas.width-80,
         80
     );
+
+	/* --- WHITE STAR Gaussian line --- */ 
+
+	const sigma = 6;     // width in pixels
+	const A = 0.85;      // depth
+
+	ctx.fillStyle = "black";
+
+	for(let x = 40; x < canvas.width - 40; x++){
+
+    	const intensity =
+        	gaussian(x, whiteX, sigma, A);
+
+    	const yTop = 90;
+    	const yBottom = 170;
+
+    	const height = (yBottom - yTop) * intensity;
+
+    	ctx.fillRect(
+        	x,
+        	yTop,
+        	1,
+       	 	height
+    	);
+	}
+
+	/* --- ฺ ฺฺBLUE STAR Gaussian line --- */ 
+
+	for(let x = 40; x < canvas.width - 40; x++){
+
+    	const intensity =
+        	gaussian(x, blueX, sigma, A);
+
+    	const yTop = 90;
+    	const yBottom = 170;
+
+    	const height = (yBottom - yTop) * intensity;
+
+    	ctx.fillRect(
+        	x,
+        	yTop,
+        	1,
+        	height
+    	);
+	}
 
     /* ---------- REST LINE ---------- */
 
@@ -1207,8 +1263,23 @@ function drawSpectroscopy(obj){
 	const amp = 120;
 	const shift = Math.sin(phaseAngle) * amp;
 
-	const whiteX = center + shift * 0.6;
-	const blueX  = center - shift;
+	const lambda0_white = 550;
+
+	const v_white = Math.sin(phaseAngle) * 60;
+
+	const lambda_white =
+    	lambda0_white * (1 + v_white / c);
+
+	const whiteX = lambdaToX(lambda_white);
+
+	const lambda0_blue = 520;
+
+	const v_blue = -Math.sin(phaseAngle) * 80;
+
+	const lambda_blue =
+   	 	lambda0_blue * (1 + v_blue / c);
+
+	const blueX = lambdaToX(lambda_blue);
 	
 	/* ---------- WHITE CORE ---------- */
 	ctx.save();
