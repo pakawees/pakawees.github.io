@@ -1137,6 +1137,16 @@ function gaussian(x, x0, sigma, A){
     return A * Math.exp(-Math.pow(x - x0, 2) / (2 * sigma * sigma));
 }
 
+function lambdaToX(lambda){
+    const min = 450;
+    const max = 650;
+
+    const canvasMin = 40;
+    const canvasMax = 320;
+
+    return canvasMin + (lambda - min) / (max - min) * (canvasMax - canvasMin);
+}
+
 function drawSpectroscopy(obj){
 
     const canvas = obj.canvas;
@@ -1181,6 +1191,12 @@ function drawSpectroscopy(obj){
 	const v_blue = -Math.sin(phaseAngle) * 80;
 	const lambda_blue = lambda0_blue * (1 + v_blue / c);
 	const blueX = lambdaToX(lambda_blue);
+
+	/* ---------- GUARD ---------- */
+	if (
+    	!Number.isFinite(whiteX) ||
+    	!Number.isFinite(blueX)
+	) return;
 
     /* ---------- SPECTRUM BAR ---------- */
 	
@@ -1289,7 +1305,7 @@ function drawSpectroscopy(obj){
 	const lambda_blue =
    	 	lambda0_blue * (1 + v_blue / c);
 
-	const blueX = lambdaToX(lambda_blue);
+	const blueX = lambdaToX(lambda_blue); */
 	
 	/* ---------- WHITE CORE ---------- */
 	ctx.save();
