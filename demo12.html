@@ -1,61 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binary Star Pro: Modern Release</title>
+    <title>Astro-Physical Binary Observation Pro (Fixed Scale)</title>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <style>
-        body { margin: 0; background: #04060f; color: #7fd4ff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; }
-        .dashboard { width: 95%; max-width: 1200px; margin: 20px; background: rgba(15, 25, 50, 0.7); border: 1px solid rgba(127, 212, 255, 0.2); border-radius: 20px; padding: 25px; backdrop-filter: blur(15px); box-shadow: 0 10px 50px rgba(0,0,0,0.8); }
-        .viz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        canvas { width: 100%; background: radial-gradient(circle, #0a1128 0%, #04060f 100%); border-radius: 15px; border: 1px solid #1a2a44; }
-        .controls { text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(127, 212, 255, 0.05); border-radius: 12px; display: flex; justify-content: center; align-items: center; gap: 15px; }
-        .label { color: #5da9ff; font-size: 0.85em; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; }
-        h2 { margin: 0 0 15px 0; text-align: center; color: #fff; text-shadow: 0 0 10px rgba(127, 212, 255, 0.5); }
-        #incInput { background: #1a2a44; border: 1px solid #7fd4ff; color: #fff; padding: 5px; border-radius: 5px; width: 65px; text-align: center; font-size: 1em; outline: none; }
+        body { margin: 0; background: #050a18; color: #7fd4ff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; }
+        .dashboard { width: 95%; max-width: 1200px; margin: 20px; background: #0a1128; border: 1px solid rgba(127, 212, 255, 0.2); border-radius: 15px; padding: 20px; }
+        .header { text-align: center; margin-bottom: 20px; color: #fff; text-transform: uppercase; letter-spacing: 2px; }
+        .controls { background: rgba(127, 212, 255, 0.05); padding: 12px; border-radius: 10px; display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .viz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .label { color: #5da9ff; font-size: 0.75em; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
+        canvas { width: 100%; background: #00040a; border-radius: 10px; border: 1px solid #1a2a44; }
+        .plot-container { height: 300px; background: #00040a; border-radius: 10px; border: 1px solid #1a2a44; }
+        input[type=number] { background: #1a2a44; border: 1px solid #7fd4ff; color: #fff; padding: 4px; border-radius: 4px; width: 55px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="dashboard">
-    <h2>Astro-Physical Binary Observation</h2>
-    
+    <div class="header"><h2>Astro-Physical Binary Observation</h2></div>
+
     <div class="controls">
-        <label>System Inclination (i): </label>
+        <span>System Inclination (i):</span>
         <input type="range" id="incRange" min="0" max="90" value="88" step="0.1" style="width: 250px;">
-        <input type="number" id="incInput" min="0" max="90" value="88" step="0.1">
-        <span>°</span>
+        <input type="number" id="incInput" value="88" step="0.1"><span>°</span>
     </div>
 
     <div class="viz-grid">
-        <div>
-            <div class="label">Orbital Dynamics (Halo & Limb Darkening)</div>
-            <canvas id="orbitCanvas" width="550" height="420"></canvas>
-        </div>
-        <div>
-            <div class="label">Doppler Spectroscopy (Shift Indicators)</div>
-            <canvas id="specCanvas" width="550" height="420"></canvas>
-        </div>
-    </div>
-
-    <div class="viz-grid">
-        <div>
-            <div class="label">Photometric Light Curve</div>
-            <div id="lcPlot" style="height:300px;"></div>
-        </div>
-        <div>
-            <div class="label">Radial Velocity (RV) Plot</div>
-            <div id="rvPlot" style="height:300px;"></div>
-        </div>
+        <div><div class="label">Orbital Dynamics (Halo & Limb Darkening)</div><canvas id="orbitCanvas" width="550" height="400"></canvas></div>
+        <div><div class="label">Doppler Spectroscopy (Shift Indicators)</div><canvas id="specCanvas" width="550" height="400"></canvas></div>
+        <div><div class="label">Photometric Light Curve</div><div id="lcPlot" class="plot-container"></div></div>
+        <div><div class="label">Radial Velocity (RV) Plot</div><div id="rvPlot" class="plot-container"></div></div>
     </div>
 </div>
 
 <script>
-    const orbitCanvas = document.getElementById('orbitCanvas');
-    const specCanvas = document.getElementById('specCanvas');
-    const oCtx = orbitCanvas.getContext('2d');
-    const sCtx = specCanvas.getContext('2d');
+    const oCanvas = document.getElementById('orbitCanvas');
+    const sCanvas = document.getElementById('specCanvas');
+    const oCtx = oCanvas.getContext('2d');
+    const sCtx = sCanvas.getContext('2d');
     const incRange = document.getElementById('incRange');
     const incInput = document.getElementById('incInput');
 
@@ -65,163 +49,137 @@
     const ampWhite = 35;
     const ampBlue = 60;
 
-    // Helper: วาดกล่องมน (รองรับ Browser เก่าที่ไม่รู้จัก roundRect)
-    function drawRoundedRect(ctx, x, y, w, h, r) {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.arcTo(x + w, y, x + w, y + h, r);
-        ctx.arcTo(x + w, y + h, x, y + h, r);
-        ctx.arcTo(x, y + h, x, y, r);
-        ctx.arcTo(x, y, x + w, y, r);
-        ctx.closePath();
-    }
-
     function updateInc(val) {
         inclination = parseFloat(val);
         incRange.value = inclination;
         incInput.value = inclination;
         updateStaticPlots();
     }
-
-    incRange.addEventListener('input', (e) => updateInc(e.target.value));
-    incInput.addEventListener('change', (e) => updateInc(e.target.value));
+    incRange.oninput = (e) => updateInc(e.target.value);
+    incInput.onchange = (e) => updateInc(e.target.value);
 
     function drawStar(ctx, x, y, r, baseColor, isWhite) {
         ctx.save();
-        const halo = ctx.createRadialGradient(x, y, r * 0.8, x, y, r * 2.5);
-        halo.addColorStop(0, baseColor + "44");
-        halo.addColorStop(1, "transparent");
-        ctx.fillStyle = halo;
-        ctx.globalCompositeOperation = 'screen';
-        ctx.beginPath(); ctx.arc(x, y, r * 2.5, 0, Math.PI * 2); ctx.fill();
-        
+        const halo = ctx.createRadialGradient(x, y, r * 0.5, x, y, r * 3);
+        halo.addColorStop(0, baseColor + "66"); halo.addColorStop(1, "transparent");
+        ctx.fillStyle = halo; ctx.globalCompositeOperation = 'screen';
+        ctx.beginPath(); ctx.arc(x, y, r * 3, 0, Math.PI * 2); ctx.fill();
         ctx.globalCompositeOperation = 'source-over';
-        const body = ctx.createRadialGradient(x - r*0.2, y - r*0.2, 0, x, y, r);
-        if (isWhite) {
-            body.addColorStop(0, '#ffffff'); body.addColorStop(0.4, '#f0f0f0'); body.addColorStop(1, '#aaaaaa');
-        } else {
-            body.addColorStop(0, '#b0e0ff'); body.addColorStop(0.4, '#66ccff'); body.addColorStop(1, '#3b9dff');
-        }
-        ctx.fillStyle = body;
-        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        const body = ctx.createRadialGradient(x - r*0.3, y - r*0.3, 0, x, y, r);
+        if (isWhite) { body.addColorStop(0, '#ffffff'); body.addColorStop(1, '#888'); }
+        else { body.addColorStop(0, '#aaddff'); body.addColorStop(1, '#0055ff'); }
+        ctx.fillStyle = body; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
     }
 
     function calculateLight(p, incRad) {
-        const x = Math.cos(p);
-        const y = Math.sin(p) * Math.cos(incRad);
-        const distSq = x*x + y*y;
+        const x = Math.cos(p), y = Math.sin(p) * Math.cos(incRad);
+        const dist = Math.sqrt(x*x + y*y);
         const r1 = 0.28, r2 = 0.18; 
         let brightness = 1.0;
-        if (distSq < (r1 + r2)**2) {
-            const dist = Math.sqrt(distSq);
+        if (dist < (r1 + r2)) {
             const overlap = Math.max(0, (r1 + r2 - dist) / (r1 + r2));
-            const ldFactor = Math.pow(overlap, 1.4);
-            brightness -= (Math.sin(p) > 0 ? 0.18 : 0.42) * ldFactor;
+            brightness -= (Math.sin(p) > 0 ? 0.18 : 0.45) * Math.pow(overlap, 1.5);
         }
         return brightness;
     }
 
     function animate() {
         const incRad = inclination * Math.PI / 180;
-        const cx = orbitCanvas.width / 2;
-        const cy = 150;
+        const cx = oCanvas.width / 2, cy = 130;
+        oCtx.clearRect(0, 0, oCanvas.width, oCanvas.height);
+        sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
 
-        oCtx.clearRect(0, 0, orbitCanvas.width, orbitCanvas.height);
-        sCtx.clearRect(0, 0, specCanvas.width, specCanvas.height);
-
-        // --- Orbit Dynamics ---
-        const x = Math.cos(phase) * orbitR;
-        const y = Math.sin(phase) * orbitR * Math.cos(incRad);
-        
+        // Orbit Panel
+        const x = Math.cos(phase) * orbitR, y = Math.sin(phase) * orbitR * Math.cos(incRad);
         oCtx.strokeStyle = "rgba(127, 212, 255, 0.1)";
         oCtx.beginPath(); oCtx.ellipse(cx, cy, orbitR, orbitR * Math.cos(incRad), 0, 0, Math.PI * 2); oCtx.stroke();
 
         if (Math.sin(phase) > 0) {
-            drawStar(oCtx, cx - x, cy - y, 14, "#66ccff", false);
-            drawStar(oCtx, cx + x, cy + y, 24, "#ffffff", true);
+            drawStar(oCtx, cx - x, cy - y, 12, "#66ccff", false);
+            drawStar(oCtx, cx + x, cy + y, 22, "#ffffff", true);
         } else {
-            drawStar(oCtx, cx + x, cy + y, 24, "#ffffff", true);
-            drawStar(oCtx, cx - x, cy - y, 14, "#66ccff", false);
+            drawStar(oCtx, cx + x, cy + y, 22, "#ffffff", true);
+            drawStar(oCtx, cx - x, cy - y, 12, "#66ccff", false);
         }
 
-        // Info Cards
-        const cardY = cy + orbitR + 40;
-        const startX = cx - 190;
-        oCtx.fillStyle = "rgba(15, 25, 50, 0.6)";
-        drawRoundedRect(oCtx, startX, cardY, 180, 110, 12); oCtx.fill();
-        drawRoundedRect(oCtx, startX + 200, cardY, 180, 110, 12); oCtx.fill();
-        
-        oCtx.fillStyle = "#fff"; oCtx.font = "bold 15px Arial";
-        oCtx.fillText("White Star", startX + 15, cardY + 30);
-        oCtx.font = "12px Arial"; oCtx.fillText(`Radius: 2.8 R\u2299`, startX + 15, cardY + 55);
-        oCtx.fillText(`Temp: 7200 K`, startX + 15, cardY + 75);
-        oCtx.fillText(`Type: F0 IV`, startX + 15, cardY + 95);
+        // Info Cards (Bottom of Panel 1)
+        const cardY = 270, cardW = 190, cardH = 100;
+        const drawCard = (cx_off, title, color, r, temp, type) => {
+            oCtx.fillStyle = "rgba(15, 25, 50, 0.8)"; oCtx.strokeStyle = "rgba(127, 212, 255, 0.2)";
+            oCtx.beginPath(); oCtx.roundRect(cx + cx_off, cardY, cardW, cardH, 10); oCtx.fill(); oCtx.stroke();
+            oCtx.fillStyle = color; oCtx.font = "bold 15px Arial"; oCtx.fillText(title, cx + cx_off + 15, cardY + 28);
+            oCtx.fillStyle = "#fff"; oCtx.font = "12px Arial";
+            oCtx.fillText(`Radius: ${r} R\u2299`, cx + cx_off + 15, cardY + 52);
+            oCtx.fillText(`Temperature: ${temp} K`, cx + cx_off + 15, cardY + 72);
+            oCtx.fillText(`Spectral Type: ${type}`, cx + cx_off + 15, cardY + 92);
+        };
+        drawCard(-205, "White Star", "#ffffff", "2.8", "7200", "F0 IV");
+        drawCard(15, "Blue Star", "#66ccff", "1.9", "14500", "B5 V");
 
-        oCtx.fillStyle = "#66ccff"; oCtx.font = "bold 15px Arial";
-        oCtx.fillText("Blue Star", startX + 215, cardY + 30);
-        oCtx.fillStyle = "#fff"; oCtx.font = "12px Arial";
-        oCtx.fillText(`Radius: 1.9 R\u2299`, startX + 215, cardY + 55);
-        oCtx.fillText(`Temp: 14500 K`, startX + 215, cardY + 75);
-        oCtx.fillText(`Type: B5 V`, startX + 215, cardY + 95);
-
-        // --- Doppler Spectroscopy ---
-        const barW = specCanvas.width - 120, barY = 110;
-        const grad = sCtx.createLinearGradient(60, 0, 60 + barW, 0);
-        grad.addColorStop(0, "#1a1aff"); grad.addColorStop(0.5, "#ffffff"); grad.addColorStop(1, "#ff1a1a");
-        sCtx.fillStyle = grad; sCtx.fillRect(60, barY, barW, 80);
+        // Spec Panel
+        const barW = 400, barH = 80, sX = (sCanvas.width - barW) / 2;
+        const grad = sCtx.createLinearGradient(sX, 0, sX + barW, 0);
+        grad.addColorStop(0, "#00f"); grad.addColorStop(0.5, "#fff"); grad.addColorStop(1, "#f00");
+        sCtx.fillStyle = grad; sCtx.fillRect(sX, 100, barW, barH);
 
         const vW = ampWhite * Math.sin(incRad) * Math.sin(phase);
         const vB = -ampBlue * Math.sin(incRad) * Math.sin(phase);
-        
-        // Digital Output (Left)
-        sCtx.fillStyle = "rgba(0,0,0,0.5)";
-        drawRoundedRect(sCtx, 60, 260, barW, 60, 8); sCtx.fill();
-        sCtx.fillStyle = "#fff"; sCtx.font = "bold 14px monospace";
-        sCtx.fillText(`White Star Vel: ${vW.toFixed(2)} km/s`, 75, 285);
-        sCtx.fillStyle = "#66ccff";
-        sCtx.fillText(`Blue Star Vel:  ${vB.toFixed(2)} km/s`, 75, 305);
+        const drawShift = (vel, color) => {
+            const ix = (sCanvas.width/2) + (vel * 3);
+            sCtx.strokeStyle = color; sCtx.lineWidth = 3;
+            sCtx.beginPath(); sCtx.moveTo(ix, 90); sCtx.lineTo(ix, 190); sCtx.stroke();
+            sCtx.fillStyle = color; sCtx.beginPath(); sCtx.arc(ix, 90, 5, 0, 7); sCtx.fill();
+            sCtx.font = "bold 11px Arial"; sCtx.textAlign = "center";
+            sCtx.fillText(`${vel > 0 ? '+':''}${vel.toFixed(1)} km/s`, ix, 210);
+        };
+        drawShift(vW, "#fff"); drawShift(vB, "#66ccff");
 
-        // Update Plot Indicators
+        // Digital Box
+        sCtx.fillStyle = "rgba(0,0,0,0.6)"; sCtx.beginPath(); sCtx.roundRect(sX, 260, barW, 60, 8); sCtx.fill();
+        sCtx.textAlign = "left"; sCtx.font = "bold 13px monospace";
+        sCtx.fillStyle = "#66ccff"; sCtx.fillText(`Blue Star (Primary):  ${vB.toFixed(2)} km/s`, sX + 15, 285);
+        sCtx.fillStyle = "#ffffff"; sCtx.fillText(`White Star (Secondary): ${vW.toFixed(2)} km/s`, sX + 15, 305);
+
+        // Sync Data
         const phaseDeg = (phase * 180 / Math.PI) % 360;
-        const currLight = calculateLight(phase, incRad);
         Plotly.restyle('rvPlot', { x: [[phaseDeg], [phaseDeg]], y: [[vW], [vB]] }, [2, 3]);
-        Plotly.restyle('lcPlot', { x: [[phaseDeg]], y: [[currLight]] }, [1]);
+        Plotly.restyle('lcPlot', { x: [[phaseDeg]], y: [[calculateLight(phase, incRad)]] }, [1]);
 
-        phase = (phase + 0.02) % (Math.PI * 2);
+        phase = (phase + 0.025) % (Math.PI * 2);
         requestAnimationFrame(animate);
     }
 
     function initPlots() {
-        const commonLayout = {
+        const layout = {
             paper_bgcolor: 'transparent', plot_bgcolor: 'rgba(0,0,0,0.2)',
-            margin: { t: 30, b: 40, l: 50, r: 20 },
-            xaxis: { gridcolor: '#1a2a44', color: '#7fd4ff', range: [0, 360] },
-            yaxis: { gridcolor: '#1a2a44', color: '#7fd4ff' },
+            margin: { t: 20, b: 40, l: 50, r: 20 },
+            xaxis: { gridcolor: '#1a2a44', color: '#7fd4ff', range: [0, 360], ticksuffix: '°' },
+            yaxis: { gridcolor: '#1a2a44', color: '#7fd4ff', fixedrange: true }, // FIX แกน Y
             showlegend: false
         };
 
+        // Light Curve Fix
         Plotly.newPlot('lcPlot', [
             { x: [], y: [], mode: 'lines', line: { color: '#ffcc00', width: 3 } },
-            { x: [0], y: [1], mode: 'markers', marker: { color: '#ff4400', size: 10 } }
-        ], { ...commonLayout, title: { text: 'Light Curve', font: {color:'#fff'} } });
+            { x: [0], y: [1], mode: 'markers', marker: { color: '#f40', size: 10, symbol: 'diamond' } }
+        ], { ...layout, yaxis: { ...layout.yaxis, title: 'Flux', range: [0.45, 1.1] } }); // กำหนด Range ตายตัว
 
         Plotly.newPlot('rvPlot', [
-            { x: [], y: [], mode: 'lines', line: { color: 'rgba(255,255,255,0.2)', dash: 'dot' } },
-            { x: [], y: [], mode: 'lines', line: { color: 'rgba(102,204,255,0.2)', dash: 'dot' } },
-            { x: [0], y: [0], mode: 'markers', marker: { color: '#fff', size: 10 } },
-            { x: [0], y: [0], mode: 'markers', marker: { color: '#66ccff', size: 10 } }
-        ], { ...commonLayout, title: { text: 'Radial Velocity', font: {color:'#fff'} } });
+            { x: [], y: [], mode: 'lines', line: { color: 'rgba(255,255,255,0.15)', dash: 'dot' } },
+            { x: [], y: [], mode: 'lines', line: { color: 'rgba(102,204,255,0.15)', dash: 'dot' } },
+            { x: [0], y: [0], mode: 'markers', marker: { color: '#fff', size: 8 } },
+            { x: [0], y: [0], mode: 'markers', marker: { color: '#66ccff', size: 8 } }
+        ], { ...layout, yaxis: { ...layout.yaxis, title: 'Velocity (km/s)', range: [-75, 75] } });
 
         updateStaticPlots();
     }
 
     function updateStaticPlots() {
-        const x = [], yL = [], yW = [], yB = [];
+        let x = [], yL = [], yW = [], yB = [];
         const incRad = inclination * Math.PI / 180;
         for(let i=0; i<=360; i+=2) {
-            x.push(i);
-            const p = i * Math.PI / 180;
+            let p = i * Math.PI / 180; x.push(i);
             yL.push(calculateLight(p, incRad));
             yW.push(ampWhite * Math.sin(incRad) * Math.sin(p));
             yB.push(-ampBlue * Math.sin(incRad) * Math.sin(p));
@@ -230,8 +188,7 @@
         Plotly.restyle('rvPlot', { x: [x, x], y: [yW, yB] }, [0, 1]);
     }
 
-    initPlots();
-    animate();
+    initPlots(); animate();
 </script>
 </body>
 </html>
