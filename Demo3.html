@@ -1105,37 +1105,27 @@ Plotly.newPlot(
 </script>
 <script>
 
+<script>
 /* =========================================================
-   DOPPLER SPECTROSCOPY ANIMATION
+   DOPPLER SPECTROSCOPY ANIMATION (FIXED VERSION)
 ========================================================= */
 
 const specSystems = [
-
     {
-        canvas:
-            document.getElementById("spec30"),
-        inclination:30
+        canvas: document.getElementById("spec30"),
+        inclination: 30
     },
-
     {
-        canvas:
-            document.getElementById("spec45"),
-        inclination:45
+        canvas: document.getElementById("spec45"),
+        inclination: 45
     },
-
     {
-        canvas:
-            document.getElementById("spec90"),
-        inclination:90
+        canvas: document.getElementById("spec90"),
+        inclination: 90
     }
-
 ];
 
-/* ---------- DRAW PANEL ---------- */
-
-function gaussian(x, x0, sigma, A){
-    return A * Math.exp(-Math.pow(x - x0, 2) / (2 * sigma * sigma));
-}
+/* ---------- SAFETY: helper MUST exist ---------- */
 
 function lambdaToX(lambda){
     const min = 450;
@@ -1147,64 +1137,59 @@ function lambdaToX(lambda){
     return canvasMin + (lambda - min) / (max - min) * (canvasMax - canvasMin);
 }
 
+/* ---------- GAUSSIAN ---------- */
+
+function gaussian(x, x0, sigma, A){
+    return A * Math.exp(-Math.pow(x - x0, 2) / (2 * sigma * sigma));
+}
+
+/* ---------- DRAW ---------- */
+
+let phaseAngle = 0;
+
 function drawSpectroscopy(obj){
 
     const canvas = obj.canvas;
+    const ctx = canvas.getContext("2d");
 
-    const ctx =
-        canvas.getContext("2d");
+    if (!ctx) return;
 
-    const inc =
-        obj.inclination *
-        Math.PI/180;
-
-    ctx.clearRect(
-        0,0,
-        canvas.width,
-        canvas.height
-    );
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
     /* ---------- BACKGROUND ---------- */
+    ctx.fillStyle = "rgba(0,0,0,0.15)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    ctx.fillStyle =
-        "rgba(0,0,0,0.15)";
+    const c = 299792.458;
 
-    ctx.fillRect(
-        0,0,
-        canvas.width,
-        canvas.height
-    );
+    /* =====================================================
+       DOPPLER SHIFT (VISUAL BOOSTED FOR VISIBILITY)
+    ===================================================== */
 
-	/* ---------- SET LAMBDA ------------ */
+    const BOOST = 150; // 🔥 important for visibility
 
-	const lambda0 = 550; // nm (mid-spectrum)
-	const c = 299792.458; // km/s
-	const v = Math.sin(phaseAngle) * 80; // km/s
-	const deltaLambda = lambda0 * (v / c);
+    const v_white = Math.sin(phaseAngle) * 60 * BOOST;
+    const v_blue  = -Math.sin(phaseAngle) * 80 * BOOST;
 
-	const lambda0_white = 550;
-	const v_white = Math.sin(phaseAngle) * 60;
-	const lambda_white = lambda0_white * (1 + v_white / c);
-	const whiteX = lambdaToX(lambda_white);
+    const lambda_white = 550 * (1 + v_white / c);
+    const lambda_blue  = 520 * (1 + v_blue / c);
 
-	const lambda0_blue = 520;
-	const v_blue = -Math.sin(phaseAngle) * 80;
-	const lambda_blue = lambda0_blue * (1 + v_blue / c);
-	const blueX = lambdaToX(lambda_blue);
+    const whiteX = lambdaToX(lambda_white);
+    const blueX  = lambdaToX(lambda_blue);
 
-	/* ---------- GUARD ---------- */
-	if (
-    	!Number.isFinite(whiteX) ||
-    	!Number.isFinite(blueX)
-	) return;
+    /* ---------- GUARD ---------- */
+
+    if (
+        !Number.isFinite(whiteX) ||
+        !Number.isFinite(blueX)
+    ) return;
 
     /* ---------- SPECTRUM BAR ---------- */
-	
-    const grad =
-        ctx.createLinearGradient(
-            40,0,
-            canvas.width-40,0
-        );
+
+    const grad = ctx.createLinearGradient(
+        40,0,
+        canvas.width-40,0
+    );
 
     grad.addColorStop(0,"#2244ff");
     grad.addColorStop(0.25,"#33bbff");
@@ -1213,181 +1198,94 @@ function drawSpectroscopy(obj){
     grad.addColorStop(1,"#ff3333");
 
     ctx.fillStyle = grad;
+    ctx.fillRect(40,90,canvas.width-80,80);
 
-    ctx.fillRect(
-        40,
-        90,
-        canvas.width-80,
-        80
-    );
+    /* ---------- ABSORPTION LINES ---------- */
 
-	/* --- WHITE STAR Gaussian line --- */ 
+    const sigma = 6;
+    const A = 0.85;
 
-	const sigma = 6;     // width in pixels
-	const A = 0.85;      // depth
+    ctx.fillStyle = "black";
 
-	ctx.fillStyle = "black";
+    for(let x = 40; x < canvas.width - 40; x++){
 
-	for(let x = 40; x < canvas.width - 40; x++){
+        let h1 = gaussian(x, whiteX, sigma, A);
+        let h2 = gaussian(x, blueX, sigma, A);
 
-    	const intensity =
-        	gaussian(x, whiteX, sigma, A);
+        const yTop = 90;
+        const yBottom = 170;
 
-    	const yTop = 90;
-    	const yBottom = 170;
+        ctx.fillRect(x, yTop, 1, (yBottom - yTop) * h1);
+        ctx.fillRect(x, yTop, 1, (yBottom - yTop) * h2);
+    }
 
-    	const height = (yBottom - yTop) * intensity;
+    /* ---------- CENTER LINE ---------- */
 
-    	ctx.fillRect(
-        	x,
-        	yTop,
-        	1,
-       	 	height
-    	);
-	}
+    const center = canvas.width / 2;
 
-	/* --- ฺ ฺฺBLUE STAR Gaussian line --- */ 
-
-	for(let x = 40; x < canvas.width - 40; x++){
-
-    	const intensity =
-        	gaussian(x, blueX, sigma, A);
-
-    	const yTop = 90;
-    	const yBottom = 170;
-
-    	const height = (yBottom - yTop) * intensity;
-
-    	ctx.fillRect(
-        	x,
-        	yTop,
-        	1,
-        	height
-    	);
-	}
-
-    /* ---------- REST LINE ---------- */
-
-    const center =
-        canvas.width/2;
-
-    ctx.strokeStyle =
-        "rgba(255,255,255,0.35)";
-
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
     ctx.lineWidth = 2;
 
     ctx.beginPath();
-
     ctx.moveTo(center,70);
     ctx.lineTo(center,190);
+    ctx.stroke();
 
-    ctx.stroke(); 
-	
+    /* ---------- DOPPLER LINES ---------- */
 
-	/* ---------- DOPPLER SHIFT (FIXED) ---------- */
-/*
-	const amp = 120;
-	const shift = Math.sin(phaseAngle) * amp;
+    ctx.save();
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "#ffffff";
 
-	const lambda0_white = 550;
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1.5;
 
-	const v_white = Math.sin(phaseAngle) * 60;
+    ctx.beginPath();
+    ctx.moveTo(whiteX, 70);
+    ctx.lineTo(whiteX, 190);
+    ctx.stroke();
 
-	const lambda_white =
-    	lambda0_white * (1 + v_white / c);
+    ctx.restore();
 
-	const whiteX = lambdaToX(lambda_white);
+    ctx.save();
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "#66ccff";
 
-	const lambda0_blue = 520;
+    ctx.strokeStyle = "#66ccff";
+    ctx.lineWidth = 1.5;
 
-	const v_blue = -Math.sin(phaseAngle) * 80;
+    ctx.beginPath();
+    ctx.moveTo(blueX, 70);
+    ctx.lineTo(blueX, 190);
+    ctx.stroke();
 
-	const lambda_blue =
-   	 	lambda0_blue * (1 + v_blue / c);
+    ctx.restore();
 
-	const blueX = lambdaToX(lambda_blue); */
-	
-	/* ---------- WHITE CORE ---------- */
-	ctx.save();
-	ctx.shadowBlur = 8;
-	ctx.shadowColor = "#ffffff";
-
-	ctx.strokeStyle = "#ffffff";
-	ctx.lineWidth = 1.5;
-
-	ctx.beginPath();
-	ctx.moveTo(whiteX, 70);
-	ctx.lineTo(whiteX, 190);
-	ctx.stroke();
-	ctx.restore();  
-
-/* ---------- BLUE CORE ---------- */
-	ctx.save();
-	ctx.shadowBlur = 8;
-	ctx.shadowColor = "#ffffff";
-	
-	ctx.strokeStyle = "#66ccff";
-
-	ctx.beginPath();
-	ctx.moveTo(blueX, 70);
-	ctx.lineTo(blueX, 190);
-	ctx.stroke();
-	ctx.restore();  
-	
     /* ---------- LABELS ---------- */
 
-    ctx.font =
-        "14px Arial";
+    ctx.font = "14px Arial";
 
-    ctx.fillStyle =
-        "#dcecff";
+    ctx.fillStyle = "#dcecff";
+    ctx.fillText("Blue Shift", 45, 220);
 
-    ctx.fillText(
-        "Blue Shift",
-        45,
-        220
-    );
+    ctx.fillText("Red Shift", canvas.width-105, 220);
 
-    ctx.fillText(
-        "Red Shift",
-        canvas.width-105,
-        220
-    );
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("White Star", 45, 35);
 
-    /* ---------- STAR LABELS ---------- */
-
-    ctx.fillStyle =
-        "#ffffff";
-
-    ctx.fillText(
-        "White Star",
-        45,
-        35
-    );
-
-    ctx.fillStyle =
-        "#66ccff";
-
-    ctx.fillText(
-        "Blue Star",
-        canvas.width-120,
-        35
-    );
-
+    ctx.fillStyle = "#66ccff";
+    ctx.fillText("Blue Star", canvas.width-120, 35);
 }
 
-/* ---------- ANIMATION ---------- */
+/* ---------- ANIMATION LOOP ---------- */
 
 function animateSpectroscopy(){
 
-    specSystems.forEach(
-        drawSpectroscopy
-    );
+    phaseAngle += 0.01; // 🔥 MUST be inside loop
 
-    requestAnimationFrame(
-        animateSpectroscopy
-    );
+    specSystems.forEach(drawSpectroscopy);
 
+    requestAnimationFrame(animateSpectroscopy);
 }
 
 animateSpectroscopy();
