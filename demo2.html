@@ -673,7 +673,7 @@ annotations:[
             '<span style="color:white;">●</span> ' +
             '<b>PRIMARY ECLIPSE</b><br>' +
             'White star eclipses blue star',
-         showarrow:false,
+        showarrow:false,
 
         font:{
             color:'#ffffff',
@@ -1129,104 +1129,57 @@ const specSystems = [
         inclination:90
     }
 
-];
+]; 
 
-/* ---------- DRAW PANEL ---------- */
-
-function drawSpectroscopy(obj){
-
+function drawSpectroscopy(obj) {
     const canvas = obj.canvas;
+    const ctx = canvas.getContext("2d");
+    const inc = obj.inclination * Math.PI / 180;
 
-    const ctx =
-        canvas.getContext("2d");
-
-    const inc =
-        obj.inclination *
-        Math.PI/180;
-
-    ctx.clearRect(
-        0,0,
-        canvas.width,
-        canvas.height
-    );
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     /* ---------- BACKGROUND ---------- */
-
-    ctx.fillStyle =
-        "rgba(0,0,0,0.15)";
-
-    ctx.fillRect(
-        0,0,
-        canvas.width,
-        canvas.height
-    );
+    ctx.fillStyle = "rgba(0,0,0,0.15)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     /* ---------- SPECTRUM BAR ---------- */
-
-    const grad =
-        ctx.createLinearGradient(
-            40,0,
-            canvas.width-40,0
-        );
-
-    grad.addColorStop(0,"#2244ff");
-    grad.addColorStop(0.25,"#33bbff");
-    grad.addColorStop(0.5,"#ffffff");
-    grad.addColorStop(0.75,"#ff9955");
-    grad.addColorStop(1,"#ff3333");
+    const grad = ctx.createLinearGradient(40, 0, canvas.width - 40, 0);
+    grad.addColorStop(0, "#2244ff");
+    grad.addColorStop(0.25, "#33bbff");
+    grad.addColorStop(0.5, "#ffffff");
+    grad.addColorStop(0.75, "#ff9955");
+    grad.addColorStop(1, "#ff3333");
 
     ctx.fillStyle = grad;
+    ctx.fillRect(40, 90, canvas.width - 80, 80);
 
-    ctx.fillRect(
-        40,
-        90,
-        canvas.width-80,
-        80
-    );
-
-    /* ---------- REST LINE ---------- */
-
-    const center =
-        canvas.width/2;
-
-    ctx.strokeStyle =
-        "rgba(255,255,255,0.35)";
-
+    /* ---------- REST LINE (Reference) ---------- */
+    const center = canvas.width / 2;
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
     ctx.lineWidth = 2;
-
     ctx.beginPath();
-
-    ctx.moveTo(center,70);
-    ctx.lineTo(center,190);
-
+    ctx.moveTo(center, 70);
+    ctx.lineTo(center, 190);
     ctx.stroke();
 
-    /* ---------- DOPPLER SHIFT ---------- */
+    /* ---------- DOPPLER SHIFT CALCULATION ---------- */
+    const amp = 55 * Math.sin(inc);
+    const shift = Math.sin(phaseAngle) * amp;
+    const whiteShift = shift * 0.6;
+    const blueShift = -shift;
 
-    const amp =
-        55 * Math.sin(inc);
-
-    const shift =
-        Math.sin(phaseAngle) * amp;
-
-    const whiteShift =
-        shift * 0.6;
-
-    const blueShift =
-        -shift;
-
-/* ---------- WHITE STAR ABSORPTION ---------- */
+    /* ---------- WHITE STAR ABSORPTION ---------- */
     const whiteX = center + whiteShift;
 
-// 1. Draw Gaussian-style Shadow Gradient (Original)
+    // 1. Shadow Gradient
     const whiteGrad = ctx.createLinearGradient(whiteX - 5, 0, whiteX + 5, 0);
-        whiteGrad.addColorStop(0, "rgba(0,0,0,0)");
-        whiteGrad.addColorStop(0.5, "rgba(0,0,0,0.92)");
-        whiteGrad.addColorStop(1, "rgba(0,0,0,0)");
+    whiteGrad.addColorStop(0, "rgba(0,0,0,0)");
+    whiteGrad.addColorStop(0.5, "rgba(0,0,0,0.92)");
+    whiteGrad.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = whiteGrad;
-    ctx.fillRect(whiteX - 5, 90, 10, 80); // Adjusted width for better fit
+    ctx.fillRect(whiteX - 5, 90, 10, 80);
 
-// 2. Add White Core Stroke (New)
+    // 2. Stroke Line (70 to 190)
     ctx.strokeStyle = "rgba(255,255,255,0.9)";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -1234,24 +1187,24 @@ function drawSpectroscopy(obj){
     ctx.lineTo(whiteX, 190);
     ctx.stroke();
 
-// 3. Add Circle Indicator at the top (5px radius)
-	ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-	ctx.beginPath();
-	ctx.arc(blueX, 70, 5, 0, Math.PI * 2); // Center point at the start of the line
-	ctx.fill();
+    // 3. Circle Indicator (Fixed variable to whiteX)
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.beginPath();
+    ctx.arc(whiteX, 70, 5, 0, Math.PI * 2); 
+    ctx.fill();
 
-/* ---------- BLUE STAR ABSORPTION ---------- */
+    /* ---------- BLUE STAR ABSORPTION ---------- */
     const blueX = center + blueShift;
 
-// 1. Draw Gaussian-style Shadow Gradient (Original)
+    // 1. Shadow Gradient
     const blueGrad = ctx.createLinearGradient(blueX - 4, 0, blueX + 4, 0);
-        blueGrad.addColorStop(0, "rgba(0,0,0,0)");
-        blueGrad.addColorStop(0.5, "rgba(0,0,0,1)");
-        blueGrad.addColorStop(1, "rgba(0,0,0,0)");
+    blueGrad.addColorStop(0, "rgba(0,0,0,0)");
+    blueGrad.addColorStop(0.5, "rgba(0,0,0,1)");
+    blueGrad.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = blueGrad;
     ctx.fillRect(blueX - 4, 90, 8, 80);
 
-// 2. Add Blue Core Stroke (New)
+    // 2. Stroke Line (70 to 190)
     ctx.strokeStyle = "rgba(102, 204, 255, 0.9)";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -1259,52 +1212,24 @@ function drawSpectroscopy(obj){
     ctx.lineTo(blueX, 190);
     ctx.stroke();
 
-// 3. Add Circle Indicator at the top (5px radius)
-	ctx.fillStyle = "rgba(102, 204, 255, 0.9)";
-	ctx.beginPath();
-	ctx.arc(blueX, 70, 5, 0, Math.PI * 2); // Center point at the start of the line
-	ctx.fill();
-	
+    // 3. Circle Indicator
+    ctx.fillStyle = "rgba(102, 204, 255, 0.9)";
+    ctx.beginPath();
+    ctx.arc(blueX, 70, 5, 0, Math.PI * 2);
+    ctx.fill();
+
     /* ---------- LABELS ---------- */
+    ctx.font = "14px Arial";
+    ctx.fillStyle = "#dcecff";
+    ctx.fillText("Blueshift", 45, 220);
+    ctx.fillText("Redshift", canvas.width - 105, 220);
 
-    ctx.font =
-        "14px Arial";
+    /* ---------- TOP STAR LABELS ---------- */
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("White ●", 45, 35);
 
-    ctx.fillStyle =
-        "#dcecff";
-
-    ctx.fillText(
-        "Blue Shift",
-        45,
-        220
-    );
-
-    ctx.fillText(
-        "Red Shift",
-        canvas.width-105,
-        220
-    );
-
-    /* ---------- STAR LABELS ---------- */
-
-    ctx.fillStyle =
-        "#ffffff";
-
-    ctx.fillText(
-        "White Star ● ",
-        45,
-        35
-    );
-
-    ctx.fillStyle =
-        "#66ccff";
-
-    ctx.fillText(
-        "● Blue Star",
-        canvas.width-120,
-        35
-    );
-
+    ctx.fillStyle = "#66ccff";
+    ctx.fillText("● Blue", canvas.width - 120, 35);
 }
 
 /* ---------- ANIMATION ---------- */
