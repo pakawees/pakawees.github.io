@@ -180,17 +180,19 @@
         const boardY = barY + barH + 75;
         sCtx.fillStyle = "rgba(0, 0, 0, 0.5)";
         sCtx.beginPath();
-        sCtx.roundRect(60, boardY - 22, barW, 40, 8);
+        sCtx.fillRect(60, boardY - 22, barW, 60, 8);
         sCtx.fill();
         
         sCtx.font = "bold 14px monospace";
-        sCtx.textAlign = "left";
+        sCtx.textAlign = "center"; // เปลี่ยนเป็นกึ่งกลางเพื่อให้ดูเป็นระเบียบในแนวตั้ง
+
+        // บรรทัดบน: White Star
         sCtx.fillStyle = "#ffffff";
-        sCtx.fillText(`STAR A (Primary): ${vW > 0 ? "+" : ""}${vW.toFixed(2)} km/s`, 80, boardY);
-        
-        sCtx.textAlign = "right";
+        sCtx.fillText(`White Star (Primary):   ${vW > 0 ? "+" : ""}${vW.toFixed(2)} km/s`, sCenter, boardY + 22);
+
+        // บรรทัดล่าง: Blue Star
         sCtx.fillStyle = "#66ccff";
-        sCtx.fillText(`STAR B (Secondary): ${vB > 0 ? "+" : ""}${vB.toFixed(2)} km/s`, specCanvas.width - 80, boardY);
+        sCtx.fillText(`Blue Star (Secondary): ${vB > 0 ? "+" : ""}${vB.toFixed(2)} km/s`, sCenter, boardY + 45);
 
         // --- Update Data Plots ---
         const phaseDeg = (phase * 180 / Math.PI);
@@ -201,7 +203,6 @@
         phase = (phase + 0.02) % (2 * Math.PI);
         requestAnimationFrame(animate);
     }
-
     function initPlots() {
         const xDeg = []; for (let i = 0; i <= 360; i += 3.6) xDeg.push(i);
         const commonLayout = {
