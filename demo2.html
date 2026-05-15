@@ -1230,9 +1230,15 @@ function drawSpectroscopy(obj){
     ctx.strokeStyle = "rgba(255,255,255,0.9)";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(whiteX, 90);
-    ctx.lineTo(whiteX, 170);
+    ctx.moveTo(whiteX, 70);
+    ctx.lineTo(whiteX, 190);
     ctx.stroke();
+
+// 3. Add Circle Indicator at the top (5px radius)
+	ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+	ctx.beginPath();
+	ctx.arc(blueX, 70, 5, 0, Math.PI * 2); // Center point at the start of the line
+	ctx.fill();
 
 /* ---------- BLUE STAR ABSORPTION ---------- */
     const blueX = center + blueShift;
@@ -1249,9 +1255,15 @@ function drawSpectroscopy(obj){
     ctx.strokeStyle = "rgba(102, 204, 255, 0.9)";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(blueX, 90);
-    ctx.lineTo(blueX, 170);
+    ctx.moveTo(blueX, 70);
+    ctx.lineTo(blueX, 190);
     ctx.stroke();
+
+// 3. Add Circle Indicator at the top (5px radius)
+	ctx.fillStyle = "rgba(102, 204, 255, 0.9)";
+	ctx.beginPath();
+	ctx.arc(blueX, 70, 5, 0, Math.PI * 2); // Center point at the start of the line
+	ctx.fill();
 	
     /* ---------- LABELS ---------- */
 
@@ -1279,7 +1291,7 @@ function drawSpectroscopy(obj){
         "#ffffff";
 
     ctx.fillText(
-        "● White Star",
+        "White Star ● ",
         45,
         35
     );
