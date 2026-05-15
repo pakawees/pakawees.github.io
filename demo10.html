@@ -82,11 +82,11 @@
         if (isWhite) {
             body.addColorStop(0, '#ffffff');
             body.addColorStop(0.4, '#f0f0f0');
-            body.addColorStop(1, '#444444');
+            body.addColorStop(1, '#aaaaaa');
         } else {
             body.addColorStop(0, '#b0e0ff');
             body.addColorStop(0.4, '#5fbaff');
-            body.addColorStop(1, '#001a33');
+            body.addColorStop(1, '#004488');
         }
         ctx.fillStyle = body;
         ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
@@ -114,7 +114,7 @@
         if (distSq < (r1 + r2)**2) {
             const dist = Math.sqrt(distSq);
             const overlap = Math.max(0, (r1 + r2 - dist) / (r1 + r2));
-            const ldFactor = Math.pow(overlap, 1.4);
+            const ldFactor = Math.pow(overlap, 1.5);
             if (Math.sin(p) > 0) brightness -= 0.18 * ldFactor; 
             else brightness -= 0.42 * ldFactor; 
         }
@@ -153,14 +153,6 @@
         grad.addColorStop(0, "#1a1aff"); grad.addColorStop(0.5, "#ffffff"); grad.addColorStop(1, "#ff1a1a");
         sCtx.fillStyle = grad; sCtx.fillRect(60, barY, barW, barH);
 
-        // Legend: Blueshift / Redshift
-        sCtx.font = "bold 13px Arial";
-        sCtx.fillStyle = "#55aaff"; sCtx.textAlign = "left";
-        sCtx.fillText("← BLUESHIFT (Toward)", 60, barY - 30);
-        
-        sCtx.fillStyle = "#ff5555"; sCtx.textAlign = "right";
-        sCtx.fillText("REDSHIFT (Away) →", specCanvas.width - 60, barY - 30);
-
         // Indicators
         const sinInc = Math.sin(incRad);
         const vW = ampWhite * sinInc * Math.sin(phase);
@@ -168,6 +160,16 @@
 
         drawIndicator(sCtx, sCenter + (Math.sin(phase) * 100 * sinInc * 0.5), barY, barY + barH, "#ffffff", vW);
         drawIndicator(sCtx, sCenter - (Math.sin(phase) * 100 * sinInc), barY, barY + barH, "#66ccff", vB);
+
+        / Legend: Blueshift / Redshift
+        const textY = barY + barH + 50; // Height Under Indicator
+        sCtx.font = "bold 12px Arial";
+
+        sCtx.fillStyle = "#55aaff"; sCtx.textAlign = "left";
+        sCtx.fillText("← BLUESHIFT (Toward)", 60, textY);
+
+        sCtx.fillStyle = "#ff5555"; sCtx.textAlign = "right";
+        sCtx.fillText("REDSHIFT (Away) →", specCanvas.width - 60, textY);
 
         // Update Markers
         const currLight = calculateLight(phase, incRad);
