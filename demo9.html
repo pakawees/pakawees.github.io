@@ -86,11 +86,11 @@
         if (isWhite) {
             body.addColorStop(0, '#ffffff');
             body.addColorStop(0.4, '#f0f0f0');
-            body.addColorStop(1, '#444444'); // Dark edge
+            body.addColorStop(1, '#999999'); // Dark edge
         } else {
             body.addColorStop(0, '#b0e0ff');
             body.addColorStop(0.4, '#5fbaff');
-            body.addColorStop(1, '#001a33'); // Dark edge
+            body.addColorStop(1, '##005cb5'); // Dark edge
         }
         ctx.fillStyle = body;
         ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
