@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>PAKAWEE R.I. | Astronomy Portfolio</title>
+<title>NARIT IS RITTANAN | Astronomy Portfolio</title>
 
 <style>
 
@@ -285,7 +285,7 @@ footer{
         ">
     </canvas>
     <div class="binary-info">
-		<h2>"Galyanivadhana"</h2>
+
     <div class="star-info white-star">
 
         <div class="star-title">
@@ -1105,61 +1105,191 @@ Plotly.newPlot(
 </script>
 <script>
 
-/* ---------- DOPPLER SHIFT ---------- */
+/* =========================================================
+   DOPPLER SPECTROSCOPY ANIMATION
+========================================================= */
 
-const amp = 55 * Math.sin(inc);
-const shift = Math.sin(phaseAngle) * amp;
+const specSystems = [
 
-const whiteX = center + shift * 0.6;
-const blueX  = center - shift;
+    {
+        canvas:
+            document.getElementById("spec30"),
+        inclination:30
+    },
 
-/* ---------- WHITE LINE ---------- */
+    {
+        canvas:
+            document.getElementById("spec45"),
+        inclination:45
+    },
 
-ctx.strokeStyle = "rgba(255,255,255,1)";
-ctx.lineWidth = 1.5;
+    {
+        canvas:
+            document.getElementById("spec90"),
+        inclination:90
+    }
 
-ctx.beginPath();
-ctx.moveTo(whiteX, 70);
-ctx.lineTo(whiteX, 190);
-ctx.stroke();
+];
 
-/* ---------- WHITE ABSORPTION ---------- */
+/* ---------- DRAW PANEL ---------- */
 
-const whiteGrad = ctx.createLinearGradient(
-    whiteX - 5, 0,
-    whiteX + 5, 0
+function drawSpectroscopy(obj){
+
+    const canvas = obj.canvas;
+
+    const ctx =
+        canvas.getContext("2d");
+
+    const inc =
+        obj.inclination *
+        Math.PI/180;
+
+    ctx.clearRect(
+        0,0,
+        canvas.width,
+        canvas.height
+    );
+
+    /* ---------- BACKGROUND ---------- */
+
+    ctx.fillStyle =
+        "rgba(0,0,0,0.15)";
+
+    ctx.fillRect(
+        0,0,
+        canvas.width,
+        canvas.height
+    );
+
+    /* ---------- SPECTRUM BAR ---------- */
+
+    const grad =
+        ctx.createLinearGradient(
+            40,0,
+            canvas.width-40,0
+        );
+
+    grad.addColorStop(0,"#2244ff");
+    grad.addColorStop(0.25,"#33bbff");
+    grad.addColorStop(0.5,"#ffffff");
+    grad.addColorStop(0.75,"#ff9955");
+    grad.addColorStop(1,"#ff3333");
+
+    ctx.fillStyle = grad;
+
+    ctx.fillRect(
+        40,
+        90,
+        canvas.width-80,
+        80
+    );
+
+    /* ---------- REST LINE ---------- */
+
+    const center =
+        canvas.width/2;
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,0.35)";
+
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+
+    ctx.moveTo(center,70);
+    ctx.lineTo(center,190);
+
+    ctx.stroke();
+
+    /* ---------- DOPPLER SHIFT ---------- */
+
+    const amp =
+        55 * Math.sin(inc);
+
+    const shift =
+        Math.sin(phaseAngle) * amp;
+
+    const whiteShift =
+        shift * 0.6;
+
+    const blueShift =
+        -shift;
+
+   /* =========================================================
+   ABSORPTION LINES
+========================================================= */
+
+/* ---------- WHITE STAR ABSORPTION ---------- */
+
+const whiteX =
+    center + whiteShift;
+
+const whiteGrad =
+    ctx.createLinearGradient(
+        whiteX-5,0,
+        whiteX+5,0
+    );
+
+whiteGrad.addColorStop(
+    0,
+    "rgba(0,0,0,0)"
 );
 
-whiteGrad.addColorStop(0, "rgba(0,0,0,0)");
-whiteGrad.addColorStop(0.5, "rgba(0,0,0,0.92)");
-whiteGrad.addColorStop(1, "rgba(0,0,0,0)");
-
-ctx.fillStyle = whiteGrad;
-ctx.fillRect(whiteX - 5, 90, 20, 80);
-
-/* ---------- BLUE LINE ---------- */
-
-ctx.strokeStyle = "rgba(120, 200, 255, 1)";
-ctx.lineWidth = 1.5;
-
-ctx.beginPath();
-ctx.moveTo(blueX, 70);
-ctx.lineTo(blueX, 190);
-ctx.stroke();
-
-/* ---------- BLUE ABSORPTION ---------- */
-
-const blueGrad = ctx.createLinearGradient(
-    blueX - 4, 0,
-    blueX + 4, 0
+whiteGrad.addColorStop(
+    0.5,
+    "rgba(0,0,0,0.92)"
 );
 
-blueGrad.addColorStop(0, "rgba(0,0,0,0)");
-blueGrad.addColorStop(0.5, "rgba(0,0,0,1)");
-blueGrad.addColorStop(1, "rgba(0,0,0,0)");
+whiteGrad.addColorStop(
+    1,
+    "rgba(0,0,0,0)"
+);
 
-ctx.fillStyle = blueGrad;
-ctx.fillRect(blueX - 4, 90, 24, 80);
+ctx.fillStyle =
+    whiteGrad;
+
+ctx.fillRect(
+    whiteX-5,
+    90,
+    20,
+    80
+);
+
+/* ---------- BLUE STAR ABSORPTION ---------- */
+
+const blueX =
+    center + blueShift;
+
+const blueGrad =
+    ctx.createLinearGradient(
+        blueX-4,0,
+        blueX+4,0
+    );
+
+blueGrad.addColorStop(
+    0,
+    "rgba(0,0,0,0)"
+);
+
+blueGrad.addColorStop(
+    0.5,
+    "rgba(0,0,0,1)"
+);
+
+blueGrad.addColorStop(
+    1,
+    "rgba(0,0,0,0)"
+);
+
+ctx.fillStyle =
+    blueGrad;
+
+ctx.fillRect(
+    blueX-4,
+    90,
+    24,
+    80
+);
     /* ---------- LABELS ---------- */
 
     ctx.font =
