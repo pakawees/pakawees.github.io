@@ -129,6 +129,20 @@
 
         const vW = ampWhite * Math.sin(incRad) * Math.sin(phase);
         const vB = -ampBlue * Math.sin(incRad) * Math.sin(phase);
+        // --- วาด Static Labels (อยู่กับที่) ---
+        sCtx.font = "bold 13px Arial";
+        
+        // ชิดซ้าย: Blue
+        sCtx.textAlign = "left";
+        sCtx.fillStyle = "#66ccff";
+        sCtx.fillText("← BLUESHIFT (Toward)", 20, 80);
+
+        // ชิดขวา: Red
+        sCtx.textAlign = "right";
+        sCtx.fillStyle = "#ff4d4d";
+        sCtx.fillText("REDSHIFT (Away) →", sCanvas.width - 20, 80);
+
+        // --- วาด Indicator (เฉพาะเส้นและตัวเลขที่เลื่อน) ---
         const drawShift = (vel, color) => {
             const ix = (sCanvas.width/2) + (vel * 3);
             sCtx.strokeStyle = color; sCtx.lineWidth = 3;
@@ -136,22 +150,8 @@
             sCtx.fillStyle = color; sCtx.beginPath(); sCtx.arc(ix, 90, 5, 0, 7); sCtx.fill();
             
             sCtx.font = "bold 11px Arial";
-            if (vel < 0) {
-                // ฝั่ง Blue: ชิดซ้ายของเส้น
-                sCtx.textAlign = "right";
-                sCtx.fillText("← BLUESHIFT (Toward)", ix - 10, 80);
-            } else if (vel > 0) {
-                // ฝั่ง Red: ชิดขวาของเส้น
-                sCtx.textAlign = "left";
-                sCtx.fillText("REDSHIFT (Away) →", ix + 10, 80);
-            } else {
-                // กรณีเป็น 0
-                sCtx.textAlign = "center";
-                sCtx.fillText("REST FRAME", ix, 80);
-            }
-
-            sCtx.font = "bold 11px Arial";
             sCtx.textAlign = "center";
+            sCtx.fillStyle = color;
             sCtx.fillText(`${vel > 0 ? '+':''}${vel.toFixed(1)} km/s`, ix, 210);
         };
         drawShift(vW, "#fff"); 
