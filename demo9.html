@@ -169,6 +169,16 @@
         Plotly.restyle('lcPlot', { x: [[phase]], y: [[currLight]] }, [1]);
 
         phase = (phase + 0.02) % (2 * Math.PI);
+
+        /* add */
+        // Legends
+        sCtx.fillStyle = "#cbdfff";
+        sCtx.font = "12px Arial";
+        sCtx.textAlign = "left";
+        sCtx.fillText("← Blueshift (Toward)", 50, barY + barH + 60);
+        sCtx.textAlign = "right";
+        sCtx.fillText("Redshift (Away) →", specCanvas.width - 50, barY + barH + 60);
+        /* end */
         requestAnimationFrame(animate);
     }
 
