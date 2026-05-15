@@ -1172,6 +1172,16 @@ function drawSpectroscopy(obj){
 	const v = Math.sin(phaseAngle) * 80; // km/s
 	const deltaLambda = lambda0 * (v / c);
 
+	const lambda0_white = 550;
+	const v_white = Math.sin(phaseAngle) * 60;
+	const lambda_white = lambda0_white * (1 + v_white / c);
+	const whiteX = lambdaToX(lambda_white);
+
+	const lambda0_blue = 520;
+	const v_blue = -Math.sin(phaseAngle) * 80;
+	const lambda_blue = lambda0_blue * (1 + v_blue / c);
+	const blueX = lambdaToX(lambda_blue);
+
     /* ---------- SPECTRUM BAR ---------- */
 	
     const grad =
@@ -1259,7 +1269,7 @@ function drawSpectroscopy(obj){
 	
 
 	/* ---------- DOPPLER SHIFT (FIXED) ---------- */
-
+/*
 	const amp = 120;
 	const shift = Math.sin(phaseAngle) * amp;
 
