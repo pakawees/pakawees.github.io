@@ -1199,25 +1199,34 @@ function drawSpectroscopy(obj){
 
     ctx.fillStyle = grad;
     ctx.fillRect(40,90,canvas.width-80,80);
+	
+   /* ---------- ABSORPTION LINES (Gaussian Profile) ---------- */
 
-    /* ---------- ABSORPTION LINES ---------- */
+// Standard deviation (sigma) defines the line width/blur (Broadening effect)
+	const sigma = 5; 
 
-    const sigma = 6;
-    const A = 0.85;
+// Peak absorption depth (0.0 to 1.0, where 1.0 is total darkness)
+	const intensity = 0.9; 
 
-    ctx.fillStyle = "black";
+// Iterate through the spectrum bar width (from x = 40 to canvas.width - 40)
+	for (let x = 40; x < canvas.width - 40; x++) {
+    
+    // Calculate Gaussian absorption factors for both stars at current x-coordinate
+    	let factorWhite = gaussian(x, whiteX, sigma, intensity);
+    	let factorBlue  = gaussian(x, blueX, sigma, intensity);
+    
+    // Combine profiles; using Math.max simulates overlapping absorption features
+    	let totalDarkness = Math.max(factorWhite, factorBlue);
 
-    for(let x = 40; x < canvas.width - 40; x++){
-
-        let h1 = gaussian(x, whiteX, sigma, A);
-        let h2 = gaussian(x, blueX, sigma, A);
-
-        const yTop = 90;
-        const yBottom = 170;
-
-        ctx.fillRect(x, yTop, 1, (yBottom - yTop) * h1);
-        ctx.fillRect(x, yTop, 1, (yBottom - yTop) * h2);
-    }
+    // Only draw if the darkness threshold is significant to optimize performance
+    	if (totalDarkness > 0.01) { 
+        	ctx.strokeStyle = `rgba(0, 0, 0, ${totalDarkness})`;
+        	ctx.beginPath();
+        	ctx.moveTo(x, 90);    // Spectrum bar top boundary
+        	ctx.lineTo(x, 170);   // Spectrum bar bottom boundary
+        	ctx.stroke();
+    	}
+	}
 
     /* ---------- CENTER LINE ---------- */
 
