@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>NARIT IS RITTANAN | Astronomy Portfolio</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial, sans-serif;
+    background:
+        radial-gradient(circle at top, #102040 0%, #050816 45%, #000000 100%);
+    color:white;
+    overflow-x:hidden;
+}
+
+/* ---------------- HERO ---------------- */
+
+.hero{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    position:relative;
+}
+
+.hero h1{
+    font-size:72px;
+    letter-spacing:4px;
+    color:#7fd4ff;
+    text-shadow:
+        0 0 10px #4cc9ff,
+        0 0 30px #4cc9ff;
+}
+
+.hero p{
+    margin-top:20px;
+    font-size:22px;
+    color:#cbdfff;
+    width:70%;
+    line-height:1.6;
+    
+}
+
+.inclination-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(280px,1fr));
+
+    gap:30px;
+    overflow:visible;
+    text-align:center;
+}
+
+.inclination-grid canvas{
+
+    width:100%;
+
+    background:none;
+
+    border-radius:0px;
+    overflow: visible;
+}
+
+.inclination-grid h3{
+
+    color:#7fd4ff;
+
+    margin-bottom:15px;
+    overflow: visible;
+}
+
+    
+/* ---------------- STARS ---------------- */
+
+.stars{
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    overflow:hidden;
+    z-index:-1;
+}
+
+.star{
+    position:absolute;
+    width:2px;
+    height:2px;
+    background:white;
+    border-radius:50%;
+    animation:twinkle 4s infinite alternate;
+}
+
+@keyframes twinkle{
+    from{
+        opacity:0.2;
+    }
+    to{
+        opacity:1;
+    }
+}
+
+/* ---------------- SECTION ---------------- */
+
+.section{
+    padding:100px 10%;
+}
+
+.section h2{
+    font-size:40px;
+    color:#7fd4ff;
+    margin-bottom:40px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:30px;
+}
+
+.card{
+    background:rgba(20,30,60,0.7);
+    border:1px solid rgba(100,180,255,0.3);
+    border-radius:20px;
+    padding:30px;
+    backdrop-filter:blur(10px);
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-10px);
+    box-shadow:
+        0 0 20px rgba(76,201,255,0.5);
+}
+
+.card h3{
+    color:#7fd4ff;
+    margin-bottom:15px;
+}
+
+.card p{
+    color:#d5e7ff;
+    line-height:1.7;
+}
+
+/* ---------------- BINARY INFO ---------------- */
+
+.binary-info{
+
+    margin-top:35px;
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:30px;
+
+    flex-wrap:wrap;
+}
+
+.star-info{
+
+    min-width:280px;
+
+    padding:20px 24px;
+
+    border-radius:18px;
+
+    background:
+        rgba(20,30,60,0.65);
+
+    border:
+        1px solid rgba(255,255,255,0.12);
+
+    backdrop-filter:blur(10px);
+
+    line-height:1.9;
+
+    box-shadow:
+        0 0 20px rgba(0,0,0,0.25);
+}
+
+.star-title{
+
+    font-size:20px;
+
+    margin-bottom:12px;
+
+    font-weight:bold;
+}
+
+.white-star .star-title{
+
+    color:#ffffff;
+}
+
+.blue-star .star-title{
+
+    color:#66ccff;
+}
+
+/* ---------------- FOOTER ---------------- */
+
+footer{
+    text-align:center;
+    padding:40px;
+    color:#8caed6;
+}
+
+</style>
+</head>
+
+<!-- TEMPLATE AREA -->
+
+<body>
+
+<div class="stars" id="stars"></div>
+
+<section class="hero">
+    <h1>NARIT IS RITTANAN</h1>
+
+    <p>
+        Astronomy Portfolio • Binary Stars • Light Curves •
+        Stellar Physics • Computational Visualization
+    </p>
+</section>
+
+<section class="section">
+
+    <h2>Projects</h2>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Binary Star Simulation</h3>
+            <p>
+                Numerical simulation and visualization
+                of eclipsing binary systems and Roche lobe interactions.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Light Curve Analysis</h3>
+            <p>
+                Analysis of photometric variability,
+                eclipses, and stellar brightness evolution.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Astrophysical Visualization</h3>
+            <p>
+                Scientific rendering of stellar systems,
+                orbital mechanics, and radiation effects.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="section">
+
+    <h2>Binary Star Simulation</h2>
+
+    <canvas id="binaryCanvas"
+        width="900"
+        height="400"
+        style="
+            width:100%;
+            background:transparent;
+        ">
+    </canvas>
+    <div class="binary-info">
+
+    <div class="star-info white-star">
+
+        <div class="star-title">
+            White Star
+        </div>
+
+        <div>
+            Radius: 2.8 R☉
+        </div>
+
+        <div>
+            Temperature: 7200 K
+        </div>
+
+        <div>
+            Spectral Type: F0 IV
+        </div>
+
+    </div>
+
+    <div class="star-info blue-star">
+
+        <div class="star-title">
+            Blue Star
+        </div>
+
+        <div>
+            Radius: 1.9 R☉
+        </div>
+
+        <div>
+            Temperature: 14500 K
+        </div>
+
+        <div>
+            Spectral Type: B5 V
+        </div>
+
+    </div>
+
+</div>
+<script>
+
+/* ---------- CANVAS ---------- */
+
+const canvas =
+    document.getElementById("binaryCanvas");
+
+const ctx = canvas.getContext("2d");
+
+let t = 0;
+
+/* ---------- DRAW STAR ---------- */
+
+function drawGlow(x,y,r,color){
+
+    const g = ctx.createRadialGradient(
+        x,y,0,
+        x,y,r*3
+    );
+
+    g.addColorStop(0,color);
+    g.addColorStop(1,"transparent");
+
+    ctx.beginPath();
+    ctx.fillStyle = g;
+    ctx.arc(x,y,r*3,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fill();
+}
+
+/* ---------- ANIMATION ---------- */
+
+function animate(){
+
+    ctx.clearRect(
+        0,0,
+        canvas.width,
+        canvas.height
+    );
+
+    const cx = canvas.width/2;
+    const cy = canvas.height/2;
+
+    /* orbit */
+
+    const r1 = 140;
+    const r2 = 90;
+
+    const x1 =
+        cx + Math.cos(t)*r1;
+
+    const y1 =
+        cy + Math.sin(t)*40;
+
+    const x2 =
+        cx - Math.cos(t)*r2;
+
+    const y2 =
+        cy - Math.sin(t)*40;
+
+    /* orbit line */
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,0.1)";
+
+    ctx.beginPath();
+    ctx.ellipse(
+        cx,cy,
+        r1,40,
+        0,0,Math.PI*2
+    );
+    ctx.stroke();
+
+    /* stars */
+
+    drawGlow(
+        x1,y1,
+        40,
+        "#ffffff"
+    );
+
+    drawGlow(
+        x2,y2,
+        24,
+        "#66ccff"
+    );
+
+    /* lens flare */
+
+    ctx.beginPath();
+    ctx.strokeStyle =
+        "rgba(255,255,255,0.25)";
+
+    ctx.moveTo(x1-60,y1);
+    ctx.lineTo(x1+60,y1);
+
+    ctx.moveTo(x1,y1-60);
+    ctx.lineTo(x1,y1+60);
+
+    ctx.stroke();
+    
+    t += 0.01;
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+</script>
+</section>
+    
+<section class="section">
+
+    <h2>Light Curve</h2>
+
+    <div id="lightcurve"
+         style="width:100%;height:500px;">
+    </div>
+
+</section>
+
+<section class="section">
+
+    <h2>Inclination Comparison</h2>
+
+    <div class="inclination-grid">
+
+        <div>
+            <h3>30°</h3>
+            <canvas id="inc30"
+                    width="500"
+                    height="400"></canvas>
+			<h3>33% Inclined</h3>
+        </div>
+
+        <div>
+            <h3>45°</h3>
+            <canvas id="inc45"
+                    width="500"
+                    height="400"></canvas>
+			<h3>50% Inclined</h3>
+        </div>
+
+        <div>
+            <h3>90°</h3>
+            <canvas id="inc90"
+                    width="500"
+                    height="400"></canvas>
+			<h3>Edge On</h3>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="section">
+
+    <h2>Doppler Spectroscopy</h2>
+
+    <div class="inclination-grid">
+
+        <div>
+            <h3>30°</h3>
+            <canvas id="spec30"
+                    width="360"
+                    height="260"></canvas>
+	    <h3>33% Inclined</h3>
+        </div>
+
+        <div>
+            <h3>45°</h3>
+            <canvas id="spec45"
+                    width="360"
+                    height="260"></canvas>
+	    <h3>50% Inclined</h3>
+        </div>
+
+        <div>
+            <h3>90°</h3>
+            <canvas id="spec90"
+                    width="360"
+                    height="260"></canvas>
+        	<h3>Edge On</h3>
+	</div>
+    </div>
+</section>
+    
+<section class="section">
+
+    <h2>Radial Velocity Curves</h2>
+
+    <div id="rvcurve"
+         style="width:100%;height:520px;">
+    </div>
+
+</section>
+    
+<footer>
+    © 2026 Pakawee Astronomy Portfolio
+</footer>
+
+<script>
+
+/* ---------- GENERATE STARS ---------- */
+
+const starsContainer = document.getElementById("stars");
+
+for(let i=0;i<300;i++){
+
+    const star = document.createElement("div");
+
+    star.classList.add("star");
+
+    star.style.left = Math.random()*100 + "%";
+    star.style.top = Math.random()*100 + "%";
+
+    star.style.opacity = Math.random();
+
+    star.style.animationDuration =
+        (Math.random()*5+2)+"s";
+
+    starsContainer.appendChild(star);
+}
+
+</script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<script>
+
+/* ---------- LIGHT CURVE DATA ---------- */
+
+let phase = [];
+let brightness = [];
+
+for(let i=0;i<500;i++){
+
+    let x = i/500 * 2;
+
+    /* eclipsing binary style */
+
+    let y =
+        1
+        - 0.35*Math.exp(-((x-0.5)**2)/0.003)
+        - 0.15*Math.exp(-((x-1.5)**2)/0.008)
+        + 0.02*Math.sin(8*x);
+
+    phase.push(x);
+    brightness.push(y);
+}
+
+/* ---------- LIGHT CURVE TRACE ---------- */
+
+const trace = {
+
+    x: phase,
+    y: brightness,
+
+    mode:'lines',
+
+    line:{
+        color:'#66ccff',
+        width:3
+    },
+
+    name:'Light Curve'
+};
+
+/* ---------- LAYOUT ---------- */
+
+const layout = {
+
+    paper_bgcolor:'rgba(0,0,0,0)',
+    plot_bgcolor:'rgba(0,0,0,0)',
+
+    font:{
+        color:'#dcecff'
+    },
+
+    xaxis:{
+        title:'Orbital Phase',
+        gridcolor:'rgba(255,255,255,0.1)',
+        zeroline:false
+    },
+
+    yaxis:{
+        title:'Relative Brightness',
+        gridcolor:'rgba(255,255,255,0.1)',
+        range:[0.55,1.05]
+    },
+
+    margin:{
+        t:30
+    },
+
+    /* ---------- ECLIPSE REGIONS ---------- */
+
+    shapes:[
+
+        /* PRIMARY */
+
+        {
+            type:'rect',
+            x0:0.42,
+            x1:0.58,
+            y0:0,
+            y1:1.1,
+
+            fillcolor:'rgba(255,255,255,0.08)',
+            line:{
+                width:0
+            }
+        },
+
+        /* SECONDARY */
+
+        {
+            type:'rect',
+            x0:1.40,
+            x1:1.60,
+            y0:0,
+            y1:1.1,
+
+            fillcolor:'rgba(102,204,255,0.08)',
+            line:{
+                width:0
+            }
+        }
+
+    ],
+
+/* ---------- LABELS ---------- */
+
+annotations:[
+
+    {
+
+        x:0.5,
+        y:0.6,
+        text:
+            '<span style="color:white;">●</span> ' +
+            '<b>PRIMARY ECLIPSE</b><br>' +
+            'White star eclipses blue star',
+         showarrow:false,
+
+        font:{
+            color:'#ffffff',
+            size:14
+        }
+
+    },
+
+    {
+
+        x:1.5,
+        y:0.8,
+
+        text:
+            '<span style="color:#66ccff;">●</span> ' +
+            '<b>SECONDARY ECLIPSE</b><br>' +
+            'Blue star eclipses white star',
+
+        showarrow:false,
+
+        font:{
+            color:'#66ccff',
+            size:14
+        }
+
+    }
+
+]
+
+};
+
+/* ---------- PLOT ---------- */
+
+Plotly.newPlot(
+
+    'lightcurve',
+
+    [trace],
+
+    layout,
+
+    {
+        responsive:true
+    }
+
+);
+
+</script>
+
+<script>
+/* ---------- INCLINATION SYSTEM ---------- */
+
+const systems = [
+
+    {
+        canvas:
+            document.getElementById("inc30"),
+        inclination:30
+    },
+
+    {
+        canvas:
+            document.getElementById("inc45"),
+        inclination:45
+    },
+
+    {
+        canvas:
+            document.getElementById("inc90"),
+        inclination:90
+    }
+
+];
+
+let phaseAngle = 0;
+
+/* ---------- DRAW STAR ---------- */
+
+function glow(ctx,x,y,r,color){
+
+    const g =
+        ctx.createRadialGradient(
+            x,y,0,
+            x,y,r*3
+        );
+
+    g.addColorStop(0,color);
+    g.addColorStop(1,"transparent");
+
+    ctx.beginPath();
+    ctx.fillStyle = g;
+    ctx.arc(x,y,r*3,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fill();
+}
+
+/* ---------- DRAW SYSTEM ---------- */
+
+function drawSystem(obj){
+
+    const canvas = obj.canvas;
+    const ctx =
+        canvas.getContext("2d");
+
+    const inc =
+        obj.inclination *
+        Math.PI/180;
+
+    ctx.clearRect(
+        0,0,
+        canvas.width,
+        canvas.height
+    );
+
+    const cx = canvas.width/2;
+    const cy = canvas.height/2;
+
+    const orbit = 90;
+
+    const x =
+        Math.cos(phaseAngle)*orbit;
+
+    const y =
+        Math.sin(phaseAngle)*
+        orbit*
+        Math.cos(inc);
+
+    const x1 = cx + x;
+    const y1 = cy + y;
+
+    const x2 = cx - x;
+    const y2 = cy - y;
+
+    /* orbit */
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,0.15)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        cx,cy,
+        orbit,
+        orbit*Math.cos(inc),
+        0,0,Math.PI*2
+    );
+
+    ctx.stroke();
+
+    /* depth sorting */
+
+    if(y > 0){
+
+        glow(ctx,x2,y2,18,"#66ccff");
+        glow(ctx,x1,y1,30,"#ffffff");
+
+    }else{
+
+        glow(ctx,x1,y1,30,"#ffffff");
+        glow(ctx,x2,y2,18,"#66ccff");
+    }
+}
+
+/* ---------- ANIMATION ---------- */
+
+function animateInclination(){
+
+    systems.forEach(drawSystem);
+
+    phaseAngle += 0.01;
+
+    requestAnimationFrame(
+        animateInclination
+    );
+}
+
+animateInclination();
+
+</script>
+<script>
+
+/* =========================================================
+   RADIAL VELOCITY CURVES
+========================================================= */
+
+let rvPhase = [];
+
+let rv30_white = [];
+let rv30_blue  = [];
+
+let rv45_white = [];
+let rv45_blue  = [];
+
+let rv90_white = [];
+let rv90_blue  = [];
+
+/* ---------- GENERATE DATA ---------- */
+
+for(let i=0;i<800;i++){
+
+    let p = i/800 * 2;
+
+    let theta =
+        p * Math.PI;
+
+    rvPhase.push(p);
+
+    /* inclination scaling */
+
+    let sin30  = Math.sin(30  * Math.PI/180);
+    let sin45 = Math.sin(45 * Math.PI/180);
+    let sin90 = Math.sin(90 * Math.PI/180);
+
+    /* white star */
+
+    rv30_white.push(
+        -40 * sin30 * Math.sin(theta)
+    );
+
+    rv45_white.push(
+        -40 * sin45 * Math.sin(theta)
+    );
+
+    rv90_white.push(
+        -40 * sin90 * Math.sin(theta)
+    );
+
+    /* blue star */
+
+    rv30_blue.push(
+        70 * sin30 * Math.sin(theta)
+    );
+
+    rv45_blue.push(
+        70 * sin45 * Math.sin(theta)
+    );
+
+    rv90_blue.push(
+        70 * sin90 * Math.sin(theta)
+    );
+}
+
+/* =========================================================
+   TRACES
+========================================================= */
+
+/* ---------- 30 DEG ---------- */
+
+const rv30White = {
+
+    x:rvPhase,
+    y:rv30_white,
+
+    mode:'lines',
+
+    name:'White Star (30°)',
+
+    line:{
+        color:'#ffffff',
+        width:2,
+        dash:'dot'
+    }
+
+};
+
+const rv30Blue = {
+
+    x:rvPhase,
+    y:rv30_blue,
+
+    mode:'lines',
+
+    name:'Blue Star (30°)',
+
+    line:{
+        color:'#66ccff',
+        width:2,
+        dash:'dot'
+    }
+
+};
+
+/* ---------- 45 DEG ---------- */
+
+const rv45White = {
+
+    x:rvPhase,
+    y:rv45_white,
+
+    mode:'lines',
+
+    name:'White Star (45°)',
+
+    line:{
+        color:'#ffffff',
+        width:3
+    }
+
+};
+
+const rv45Blue = {
+
+    x:rvPhase,
+    y:rv45_blue,
+
+    mode:'lines',
+
+    name:'Blue Star (45°)',
+
+    line:{
+        color:'#66ccff',
+        width:3
+    }
+
+};
+
+/* ---------- 90 DEG ---------- */
+
+const rv90White = {
+
+    x:rvPhase,
+    y:rv90_white,
+
+    mode:'lines',
+
+    name:'White Star (90°)',
+
+    line:{
+        color:'#ffffff',
+        width:4
+    }
+
+};
+
+const rv90Blue = {
+
+    x:rvPhase,
+    y:rv90_blue,
+
+    mode:'lines',
+
+    name:'Blue Star (90°)',
+
+    line:{
+        color:'#66ccff',
+        width:4
+    }
+
+};
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+const rvLayout = {
+
+    paper_bgcolor:'rgba(0,0,0,0)',
+    plot_bgcolor:'rgba(0,0,0,0)',
+
+    font:{
+        color:'#dcecff'
+    },
+
+    xaxis:{
+
+        title:'Orbital Phase',
+
+        gridcolor:'rgba(255,255,255,0.08)',
+
+        zeroline:false
+
+    },
+
+    yaxis:{
+
+        title:'Radial Velocity (km/s)',
+
+        gridcolor:'rgba(255,255,255,0.08)',
+
+        zerolinecolor:
+            'rgba(255,255,255,0.25)'
+
+    },
+
+    legend:{
+        orientation:'h',
+        y:1.12
+    },
+
+    margin:{
+        t:60
+    }
+
+};
+
+/* =========================================================
+   PLOT
+========================================================= */
+
+Plotly.newPlot(
+
+    'rvcurve',
+
+    [
+
+        rv30White,
+        rv30Blue,
+
+        rv45White,
+        rv45Blue,
+
+        rv90White,
+        rv90Blue
+
+    ],
+
+    rvLayout,
+
+    {
+        responsive:true
+    }
+
+);
+
+</script>
+<script>
+
+/* =========================================================
+   DOPPLER SPECTROSCOPY ANIMATION
+========================================================= */
+
+const specSystems = [
+
+    {
+        canvas:
+            document.getElementById("spec30"),
+        inclination:30
+    },
+
+    {
+        canvas:
+            document.getElementById("spec45"),
+        inclination:45
+    },
+
+    {
+        canvas:
+            document.getElementById("spec90"),
+        inclination:90
+    }
+
+];
+
+/* ---------- DRAW PANEL ---------- */
+
+function drawSpectroscopy(obj){
+
+    const canvas = obj.canvas;
+
+    const ctx =
+        canvas.getContext("2d");
+
+    const inc =
+        obj.inclination *
+        Math.PI/180;
+
+    ctx.clearRect(
+        0,0,
+        canvas.width,
+        canvas.height
+    );
+
+    /* ---------- BACKGROUND ---------- */
+
+    ctx.fillStyle =
+        "rgba(0,0,0,0.15)";
+
+    ctx.fillRect(
+        0,0,
+        canvas.width,
+        canvas.height
+    );
+
+    /* ---------- SPECTRUM BAR ---------- */
+
+    const grad =
+        ctx.createLinearGradient(
+            40,0,
+            canvas.width-40,0
+        );
+
+    grad.addColorStop(0,"#2244ff");
+    grad.addColorStop(0.25,"#33bbff");
+    grad.addColorStop(0.5,"#ffffff");
+    grad.addColorStop(0.75,"#ff9955");
+    grad.addColorStop(1,"#ff3333");
+
+    ctx.fillStyle = grad;
+
+    ctx.fillRect(
+        40,
+        90,
+        canvas.width-80,
+        80
+    );
+
+    /* ---------- REST LINE ---------- */
+
+    const center =
+        canvas.width/2;
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,0.35)";
+
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+
+    ctx.moveTo(center,70);
+    ctx.lineTo(center,190);
+
+    ctx.stroke();
+
+    /* ---------- DOPPLER SHIFT ---------- */
+
+    const amp =
+        55 * Math.sin(inc);
+
+    const shift =
+        Math.sin(phaseAngle) * amp;
+
+    const whiteShift =
+        shift * 0.6;
+
+    const blueShift =
+        -shift;
+
+   /* =========================================================
+   ABSORPTION LINES
+========================================================= */
+
+/* ---------- WHITE CORE LINE ---------- */
+
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    ctx.lineWidth = 1.2;
+
+    ctx.beginPath();
+    ctx.moveTo(whiteX, 70);
+    ctx.lineTo(whiteX, 190);
+    ctx.stroke();
+
+/* ---------- WHITE ABSORPTION ---------- */
+
+    const whiteGrad = ctx.createLinearGradient(
+      whiteX - 5, 0,
+      whiteX + 5, 0
+    );
+
+    whiteGrad.addColorStop(0, "rgba(0,0,0,0)");
+    whiteGrad.addColorStop(0.5, "rgba(0,0,0,0.92)");
+    whiteGrad.addColorStop(1, "rgba(0,0,0,0)");
+
+    ctx.fillStyle = whiteGrad;
+    ctx.fillRect(whiteX - 5, 90, 20, 80);
+
+/* ---------- BLUE CORE LINE ---------- */
+
+    ctx.strokeStyle = "rgba(120,200,255,0.9)";
+    ctx.lineWidth = 1.2;
+
+    ctx.beginPath();
+    ctx.moveTo(blueX, 70);
+    ctx.lineTo(blueX, 190);
+    ctx.stroke();
+
+/* ---------- BLUE ABSORPTION ---------- */
+
+    const blueGrad = ctx.createLinearGradient(
+      blueX - 4, 0,
+      blueX + 4, 0
+  );
+
+    blueGrad.addColorStop(0, "rgba(0,0,0,0)");
+    blueGrad.addColorStop(0.5, "rgba(0,0,0,1)");
+    blueGrad.addColorStop(1, "rgba(0,0,0,0)");
+
+    ctx.fillStyle = blueGrad;
+    ctx.fillRect(blueX - 4, 90, 24, 80);
+	
+    /* ---------- LABELS ---------- */
+
+    ctx.font =
+        "14px Arial";
+
+    ctx.fillStyle =
+        "#dcecff";
+
+    ctx.fillText(
+        "Blue Shift",
+        45,
+        220
+    );
+
+    ctx.fillText(
+        "Red Shift",
+        canvas.width-105,
+        220
+    );
+
+    /* ---------- STAR LABELS ---------- */
+
+    ctx.fillStyle =
+        "#ffffff";
+
+    ctx.fillText(
+        "White Star",
+        45,
+        35
+    );
+
+    ctx.fillStyle =
+        "#66ccff";
+
+    ctx.fillText(
+        "Blue Star",
+        canvas.width-120,
+        35
+    );
+
+}
+
+/* ---------- ANIMATION ---------- */
+
+function animateSpectroscopy(){
+
+    specSystems.forEach(
+        drawSpectroscopy
+    );
+
+    requestAnimationFrame(
+        animateSpectroscopy
+    );
+
+}
+
+animateSpectroscopy();
+
+</script>
+</body>
+</html>
