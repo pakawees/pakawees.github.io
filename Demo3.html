@@ -1219,16 +1219,6 @@ function drawSpectroscopy(obj){
    ABSORPTION LINES
 ========================================================= */
 
-/* ---------- WHITE CORE LINE ---------- */
-
-    ctx.strokeStyle = "rgba(255,255,255,0.9)";
-    ctx.lineWidth = 1.2;
-
-    ctx.beginPath();
-    ctx.moveTo(whiteX, 70);
-    ctx.lineTo(whiteX, 190);
-    ctx.stroke();
-
 /* ---------- WHITE ABSORPTION ---------- */
 
     const whiteGrad = ctx.createLinearGradient(
@@ -1243,15 +1233,18 @@ function drawSpectroscopy(obj){
     ctx.fillStyle = whiteGrad;
     ctx.fillRect(whiteX - 5, 90, 20, 80);
 
-/* ---------- BLUE CORE LINE ---------- */
+/* ---------- WHITE CORE LINE ---------- */
 
-    ctx.strokeStyle = "rgba(120,200,255,0.9)";
+	    ctx.strokeStyle = "rgba(255,255,255,0.9)";
     ctx.lineWidth = 1.2;
 
     ctx.beginPath();
-    ctx.moveTo(blueX, 70);
-    ctx.lineTo(blueX, 190);
+    ctx.moveTo(whiteX, 70);
+    ctx.lineTo(whiteX, 190);
     ctx.stroke();
+
+	ctx.shadowBlur = 10;
+	ctx.shadowColor = "#ffffff";
 
 /* ---------- BLUE ABSORPTION ---------- */
 
@@ -1266,6 +1259,18 @@ function drawSpectroscopy(obj){
 
     ctx.fillStyle = blueGrad;
     ctx.fillRect(blueX - 4, 90, 24, 80);
+
+	/* ---------- BLUE CORE LINE ---------- */
+
+    ctx.strokeStyle = "rgba(120,200,255,0.9)";
+    ctx.lineWidth = 1.2;
+
+    ctx.beginPath();
+    ctx.moveTo(blueX, 70);
+    ctx.lineTo(blueX, 190);
+	ctx.shadowBlur = 10;
+	ctx.shadowColor = "#66ccff";
+    ctx.stroke();
 	
     /* ---------- LABELS ---------- */
 
