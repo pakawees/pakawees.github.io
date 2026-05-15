@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binary Star Pro: Final Research Edition</title>
+    <title>Binary Star Pro: Layout & Text Adjusted</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body { margin: 0; background: #04060f; color: #7fd4ff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; }
@@ -40,7 +40,6 @@
     </div>
 
     <div class="viz-grid">
-        <!-- สลับฝั่งตรงนี้ -->
         <div>
             <div class="label">Photometric Light Curve</div>
             <div id="lcPlot" style="height:300px;"></div>
@@ -173,22 +172,27 @@
         drawIndicator(sCtx, sCenter + (Math.sin(phase) * 100 * sinInc * 0.5), barY, barY + barH, "#ffffff", vW);
         drawIndicator(sCtx, sCenter - (Math.sin(phase) * 100 * sinInc), barY, barY + barH, "#66ccff", vB);
 
+        // Digital Readout Board (Left Aligned, 10px from edge)
         const boardY = barY + barH + 65;
+        const boardX = 60; 
+        const paddingLeft = 10;
+
         sCtx.fillStyle = "rgba(0, 0, 0, 0.5)";
         sCtx.beginPath();
-        sCtx.roundRect(60, boardY, barW, 60, 8);
+        sCtx.roundRect(boardX, boardY, barW, 60, 8);
         sCtx.fill();
         
         sCtx.font = "bold 14px monospace";
         sCtx.textAlign = "left";
-        sCtx.fillStyle = "#66ccff";
-        sCtx.fillText(`Blue Star (Primary; More Luminous): ${vB > 0 ? "+" : ""}${vB.toFixed(2)} km/s`, sCenter, boardY + 22);
+        
         sCtx.fillStyle = "#ffffff";
-        sCtx.fillText(`White Star (Secondary; Less Luminous):   ${vW > 0 ? "+" : ""}${vW.toFixed(2)} km/s`, sCenter, boardY + 45);
+        sCtx.fillText(`White Star (Primary):   ${vW > 0 ? "+" : ""}${vW.toFixed(2)} km/s`, boardX + paddingLeft, boardY + 22);
+        
+        sCtx.fillStyle = "#66ccff";
+        sCtx.fillText(`Blue Star (Secondary): ${vB > 0 ? "+" : ""}${vB.toFixed(2)} km/s`, boardX + paddingLeft, boardY + 45);
 
         const phaseDeg = (phase * 180 / Math.PI);
         const currLight = calculateLight(phase, incRad);
-        // restyle plots based on their new positions
         Plotly.restyle('rvPlot', { x: [[phaseDeg], [phaseDeg]], y: [[vW], [vB]] }, [2, 3]);
         Plotly.restyle('lcPlot', { x: [[phaseDeg]], y: [[currLight]] }, [1]);
 
