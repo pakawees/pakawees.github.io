@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Binary Lab - Barycenter Physics</title>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <style>
+        body { margin: 0; background: #050a18; color: #7fd4ff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; }
+        .dashboard { width: 98%; max-width: 1200px; margin: 15px; background: #0a1128; border: 1px solid #1a2a44; border-radius: 10px; padding: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        .master-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; background: rgba(127, 212, 255, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(127, 212, 255, 0.1); font-size: 0.9em; }
+        .ctrl-group { display: flex; flex-direction: column; gap: 8px; border-right: 1px solid rgba(127, 212, 255, 0.1); padding: 0 10px; }
+        .ctrl-group:last-child { border-right: none; }
+        .viz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        canvas { width: 100%; background: #000; border: 1px solid #1a2a44; border-radius: 5px; }
+        .plot-container { height: 260px; background: #000; border-radius: 5px; }
+        .data-readout { font-family: 'Courier New', monospace; font-size: 13px; margin-top: 5px; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 4px; line-height: 1.4; border: 1px solid rgba(255,255,255,0.1); font-weight: bold; }
+        select, input { background: #1a2a44; color: #fff; border: 1px solid #7fd4ff; border-radius: 3px; padding: 3px; }
+        input[type="number"] { width: 55px; text-align: center; }
+        .label-text { font-weight: bold; color: #ffcc00; margin-bottom: 5px; display: block; }
+        .input-row { display: flex; align-items: center; justify-content: space-between; gap: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <h2 style="text-align:center; color:#fff; margin-top:0;">Barycentric Binary Star Lab</h2>
+    
+    <div class="master-controls">
+        <div class="ctrl-group">
+            <span class="label-text">SYSTEM PARAMETERS</span>
+            <div class="input-row">
+                Semi-major axis (AU): 
+                <input type="number" id="distNum" value="1.00" step="0.01" min="0.01">
+                <input type="range" id="distRange" min="0.05" max="10" value="1.0" step="0.05">
+            </div>
+            <div class="input-row">
+                Inclination (°): 
+                <input type="number" id="incNum" value="88" min="0" max="90">
+                <input type="range" id="incRange" min="0" max="90" value="88">
+            </div>
+            <div id="physicsReadout" class="data-readout" style="color:#0f0;"></div>
+        </div>
+
+        <div class="ctrl-group">
+            <span class="label-text">STAR A SETTINGS</span>
+            <div>Spectral: 
+                <select id="classA">
+                    <option value="W">W</option><option value="O">O</option><option value="B">B</option>
+                    <option value="A">A</option><option value="F" selected>F</option><option value="G">G</option>
+                    <option value="K">K</option><option value="M">M</option>
+                </select>
+                Sub: <input type="number" id="subA" min="0" max="9" value="0">
+            </div>
+            <div>Type: 
+                <select id="typeA">
+                    <option value="I">I</option><option value="III" selected>III</option>
+                    <option value="V">V</option><option value="d">d</option>
+                </select>
+            </div>
+            <div id="starAReadout" class="data-readout"></div>
+        </div>
+
+        <div class="ctrl-group">
+            <span class="label-text">STAR B SETTINGS</span>
+            <div>Spectral: 
+                <select id="classB">
+                    <option value="W">W</option><option value="O">O</option><option value="B" selected>B</option>
+                    <option value="A">A</option><option value="F">F</option><option value="G">G</option>
+                    <option value="K">K</option><option value="M">M</option>
+                </select>
+                Sub: <input type="number" id="subB" min="0" max="9" value="1.7">
+            </div>
+            <div>Type: 
+                <select id="typeB">
+                    <option value="I">I</option><option value="III">III</option>
+                    <option value="V" selected>V</option><option value="d">d</option>
+                </select>
+            </div>
+            <div id="starBReadout" class="data-readout"></div>
+        </div>
+    </div>
+
+    <div class="viz-grid">
+        <canvas id="orbit" width="500" height="300"></canvas>
+        <canvas id="spec" width="500" height="300"></canvas>
+        <div id="lc" class="plot-container"></div>
+        <div id="rv" class="plot-container"></div>
+    </div>
+</div>
+
+<script>
+    const oCtx = document.getElementById('orbit').getContext('2d');
+    const sCtx = document.getElementById('spec').getContext('2d');
+    let phase = 0, system = { dist: 1.0, inc: 88, velocity: 0, period: 0 }, stars = { a: {}, b: {} };
+
+    function syncInputs(id1, id2) {
+        const el1 = document.getElementById(id1);
+        const el2 = document.getElementById(id2);
+        el1.addEventListener('input', () => { el2.value = el1.value; updateDynamics(); });
+        el2.addEventListener('input', () => { el1.value = el2.value; updateDynamics(); });
+    }
+
+    function getAstroData(sClass, sub, type) {
+        const tempBase = { W: 45000, O: 35000, B: 18000, A: 9200, F: 7200, G: 5800, K: 4800, M: 3400 };
+        const massBase = { W: 60, O: 40, B: 12, A: 2.1, F: 1.4, G: 1.0, K: 0.8, M: 0.4 };
+        let temp = tempBase[sClass] - (sub * 200);
+        let mass = massBase[sClass] * (1 - sub/30);
+        let radius = 1.0;
+        let color = "#fff";
+
+        if(sClass === "W" || sClass === "O") color = "#0044ff"; 
+        else if(sClass === "B") color = "#aad4ff"; 
+        else if(sClass === "A") color = "#ffffff"; 
+        else if(sClass === "F") color = "#ffffcc"; 
+        else if(sClass === "G") color = "#ffff00"; 
+        else if(sClass === "K") color = "#ff9900"; 
+        else if(sClass === "M") color = "#ff3300"; 
+
+        if (type === "V") radius = Math.pow(mass, 0.85);
+        else if (type === "III") radius = 8 + (mass * 0.5);
+        else if (type === "I") radius = 50;
+        else if (type === "d") { radius = 0.015; mass = 0.6; temp = 15000; color = "#e0f0ff"; }
+
+        return { mass, temp, radius, color, lum: Math.pow(radius, 2) * Math.pow(temp/5800, 4) };
+    }
+
+    function updateDynamics() {
+        system.dist = parseFloat(document.getElementById('distNum').value) || 0.01;
+        system.inc = parseFloat(document.getElementById('incNum').value) || 0;
+
+        stars.a = getAstroData(document.getElementById('classA').value, document.getElementById('subA').value, document.getElementById('typeA').value);
+        stars.b = getAstroData(document.getElementById('classB').value, document.getElementById('subB').value, document.getElementById('typeB').value);
+
+        const aIsPrimary = stars.a.lum >= stars.b.lum;
+        let totalM = stars.a.mass + stars.b.mass;
+        system.period = Math.sqrt(Math.pow(system.dist, 3) / totalM);
+        
+        // ความเร็วรวมของระบบ (km/s)
+        const v_total = (2 * Math.PI * system.dist * 1.496e8) / (system.period * 3.154e7);
+        
+        // แยกความเร็วตามสัดส่วนมวล (Barycentric Velocity)
+        stars.a.v_orb = v_total * (stars.b.mass / totalM);
+        stars.b.v_orb = v_total * (stars.a.mass / totalM);
+
+        // แยกขอบเขตวงโคจรใน Canvas (Scaling factor = 100 / total_dist)
+        const scale = 120 / system.dist; 
+        stars.a.a_orb = system.dist * (stars.b.mass / totalM) * scale;
+        stars.b.a_orb = system.dist * (stars.a.mass / totalM) * scale;
+
+        document.getElementById('physicsReadout').innerHTML = `Period: ${system.period.toFixed(3)} yrs<br>V_total: ${v_total.toFixed(1)} km/s`;
+        
+        const updateReadout = (el, star, role) => {
+            el.style.color = star.color;
+            el.innerHTML = `[${role}]<br>Mass: ${star.mass.toFixed(2)} M⊙<br>Radius: ${star.radius.toFixed(2)} R⊙<br>V_orbit: ${star.v_orb.toFixed(1)} km/s`;
+        };
+        updateReadout(document.getElementById('starAReadout'), stars.a, aIsPrimary ? "PRIMARY" : "SECONDARY");
+        updateReadout(document.getElementById('starBReadout'), stars.b, aIsPrimary ? "SECONDARY" : "PRIMARY");
+        
+        updateStaticPlots();
+    }
+
+    function calcLight(p) {
+        const incRad = system.inc * Math.PI / 180;
+        // ระยะห่างปรากฏระหว่างดาวทั้งสอง (Projection)
+        const x_sep = (stars.a.a_orb + stars.b.a_orb) * Math.cos(p);
+        const y_sep = (stars.a.a_orb + stars.b.a_orb) * Math.sin(p) * Math.cos(incRad);
+        const d_pixels = Math.sqrt(x_sep*x_sep + y_sep*y_sep);
+        
+        // ปรับค่า r เป็น pixels สำหรับการคำนวณ Eclipse
+        const r1 = stars.a.radius * 2, r2 = stars.b.radius * 2;
+        const totalL = stars.a.lum + stars.b.lum;
+
+        if (d_pixels < (r1 + r2)) {
+            const overlap = Math.max(0, (r1 + r2 - d_pixels) / (r1 + r2));
+            // เช็คว่าใครอยู่หน้า (z-axis)
+            return (Math.sin(p) > 0) ? (totalL - (stars.b.lum * overlap * 0.9))/totalL : (totalL - (stars.a.lum * overlap * 0.9))/totalL;
+        }
+        return 1.0;
+    }
+
+    function animate() {
+        const incRad = system.inc * Math.PI / 180;
+        oCtx.clearRect(0,0,500,300); sCtx.clearRect(0,0,500,300);
+        
+        // จุดศูนย์กลางมวล (Barycenter)
+        oCtx.fillStyle = "white"; oCtx.beginPath(); oCtx.arc(250,150,2,0,7); oCtx.fill();
+
+        // คำนวณตำแหน่งแต่ละดวง (ดาว B อยู่ตรงข้ามดาว A เสมอ)
+        const xA = Math.cos(phase)*stars.a.a_orb, yA = Math.sin(phase)*stars.a.a_orb*Math.cos(incRad);
+        const xB = Math.cos(phase + Math.PI)*stars.b.a_orb, yB = Math.sin(phase + Math.PI)*stars.b.a_orb*Math.cos(incRad);
+        
+        // วงโคจรประ
+        oCtx.setLineDash([3, 5]); oCtx.strokeStyle = "#1a2a44";
+        oCtx.beginPath(); oCtx.ellipse(250,150,stars.a.a_orb,stars.a.a_orb*Math.cos(incRad),0,0,7); oCtx.stroke();
+        oCtx.beginPath(); oCtx.ellipse(250,150,stars.b.a_orb,stars.b.a_orb*Math.cos(incRad),0,0,7); oCtx.stroke();
+        oCtx.setLineDash([]);
+
+        const drawS = (x, y, r, col) => {
+            oCtx.shadowBlur = 10; oCtx.shadowColor = col; oCtx.fillStyle = col;
+            oCtx.beginPath(); oCtx.arc(250+x, 150+y, Math.max(3, r*0.8), 0, 7); oCtx.fill();
+            oCtx.shadowBlur = 0;
+        };
+
+        // เรียงลำดับการวาด (Z-order)
+        if(Math.sin(phase) > 0) { drawS(xB, yB, stars.b.radius, stars.b.color); drawS(xA, yA, stars.a.radius, stars.a.color); }
+        else { drawS(xA, yA, stars.a.radius, stars.a.color); drawS(xB, yB, stars.b.radius, stars.b.color); }
+
+        // Spectroscopy (RV)
+        const sinInc = Math.sin(incRad);
+        const vA_obs = stars.a.v_orb * sinInc * Math.sin(phase);
+        const vB_obs = -stars.b.v_orb * sinInc * Math.sin(phase);
+        
+        const grad = sCtx.createLinearGradient(50,0,450,0);
+        grad.addColorStop(0,"blue"); grad.addColorStop(0.5, "white"); grad.addColorStop(1,"red");
+        sCtx.fillStyle = grad; sCtx.fillRect(50, 100, 400, 80);
+        
+        const drawLine = (vel, star, lbl, yOff) => {
+            const lx = 250 + vel; // Scale velocity line
+            sCtx.strokeStyle = star.color; sCtx.lineWidth = 3;
+            sCtx.beginPath(); sCtx.moveTo(lx, 95); sCtx.lineTo(lx, 185); sCtx.stroke();
+            sCtx.fillStyle = star.color; sCtx.font = "bold 11px Arial";
+            sCtx.fillText(`${lbl}: ${vel.toFixed(1)} km/s`, lx - 30, yOff);
+        };
+        drawLine(vA_obs, stars.a, "Star A", 85);
+        drawLine(vB_obs, stars.b, "Star B", 205);
+
+        if(window.Plotly) {
+            const deg = (phase*180/Math.PI)%360;
+            Plotly.restyle('rv', { x:[[deg],[deg]], y:[[vA_obs],[vB_obs]] }, [2,3]);
+            Plotly.restyle('lc', { x:[[deg]], y:[[calcLight(phase)]] }, [1]);
+        }
+        phase += 0.05 / (system.period + 0.1);
+        requestAnimationFrame(animate);
+    }
+
+    function init() {
+        syncInputs('distNum', 'distRange');
+        syncInputs('incNum', 'incRange');
+        const layout = { paper_bgcolor:'black', plot_bgcolor:'#050a18', margin:{t:30,b:35,l:45,r:15}, font:{color:'#7fd4ff', size:10}, xaxis:{gridcolor:'#1a2a44', range:[0,360]}, yaxis:{gridcolor:'#1a2a44', fixedrange:true}};
+        Plotly.newPlot('lc', [{x:[], y:[], name:'Flux', line:{color:'yellow'}}, {x:[0], y:[1], mode:'markers', marker:{color:'red'}, name:'Phase'}], {...layout, yaxis:{...layout.yaxis, range:[0.1, 1.1]}});
+        Plotly.newPlot('rv', [{x:[], y:[], name:'RV A', line:{dash:'dot'}}, {x:[], y:[], name:'RV B', line:{dash:'dot'}}, {x:[0], y:[0], mode:'markers', name:'A'}, {x:[0], y:[0], mode:'markers', name:'B'}], {...layout, yaxis:{...layout.yaxis, range:[-250, 250]}});
+        document.querySelectorAll('input, select').forEach(el => el.oninput = updateDynamics);
+        updateDynamics(); animate();
+    }
+
+    function updateStaticPlots() {
+        let x=[], yL=[], yA=[], yB=[];
+        const incRad = system.inc * Math.PI / 180;
+        const sinInc = Math.sin(incRad);
+        for(let i=0; i<=360; i+=2) {
+            let p = i*Math.PI/180; x.push(i);
+            yL.push(calcLight(p));
+            yA.push(stars.a.v_orb * sinInc * Math.sin(p));
+            yB.push(-stars.b.v_orb * sinInc * Math.sin(p));
+        }
+        Plotly.restyle('lc', {x:[x], y:[yL]}, [0]);
+        Plotly.restyle('rv', { x:[x,x], y:[yA,yB], 'line.color': [stars.a.color, stars.b.color], 'marker.color': [null, null, stars.a.color, stars.b.color]}, [0,1,2,3]);
+    }
+    window.onload = init;
+</script>
+</body>
+</html>
