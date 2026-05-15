@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>NARIT IS RITTANAN | Astronomy Portfolio</title>
+<title>PAKAWEE R.I. | Astronomy Portfolio</title>
 
 <style>
 
@@ -1215,95 +1215,77 @@ function drawSpectroscopy(obj){
     const blueShift =
         -shift;
 
-   /* =========================================================
+/* =========================================================
    ABSORPTION LINES
 ========================================================= */
 
 /* ---------- WHITE STAR ABSORPTION ---------- */
 	
-const whiteX =
-    center + whiteShift;
+	const whiteX =
+    	center + whiteShift;
 
 /* =========================================================
    MOVING WHITE SPECTRAL LINE (CORE LINE)
 ========================================================= */
 
-ctx.strokeStyle = "rgba(255, 255, 255, 1)";
-ctx.lineWidth = 1.5;
+	ctx.strokeStyle = "rgba(255, 255, 255, 1)";
+	ctx.lineWidth = 1.5;
 
-ctx.beginPath();
-ctx.moveTo(blueX, 70);
-ctx.lineTo(blueX, 190);
-ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(blueX, 70);
+	ctx.lineTo(blueX, 190);
+	ctx.stroke();
 	
-const whiteGrad =
-    ctx.createLinearGradient(
-        whiteX-5,0,
-        whiteX+5,0
-    );
+	const whiteGrad =
+    	ctx.createLinearGradient(
+        	whiteX-5,0,
+        	whiteX+5,0
+    	);
 
-whiteGrad.addColorStop(
-    0,
-    "rgba(0,0,0,0)"
-);
+		whiteGrad.addColorStop(0,"rgba(0,0,0,0)");
+		whiteGrad.addColorStop(0.5,"rgba(0,0,0,0.92)");
+		whiteGrad.addColorStop(1,"rgba(0,0,0,0)");
+   			
+		ctx.fillStyle = whiteGrad;
 
-whiteGrad.addColorStop(
-    0.5,
-    "rgba(0,0,0,0.92)"
-);
+		ctx.fillRect(whiteX-5,90,20,80);
 
-whiteGrad.addColorStop(
-    1,
-    "rgba(0,0,0,0)"
-);
-
-ctx.fillStyle =
-    whiteGrad;
-
-ctx.fillRect(
-    whiteX-5,
-    90,
-    20,
-    80
-); 
-
-	
 /* ---------- BLUE STAR ABSORPTION ---------- */
 
-const blueX = center + blueShift;
+	const blueX = center + blueShift;
 
 /* =========================================================
    MOVING BLUE SPECTRAL LINE (CORE LINE)
 ========================================================= */
 
-ctx.strokeStyle = "rgba(120, 200, 255, 1)";
-ctx.lineWidth = 1.5;
+	ctx.strokeStyle = "rgba(120, 200, 255, 1)";
+	ctx.lineWidth = 1.5;
 
-ctx.beginPath();
-ctx.moveTo(blueX, 70);
-ctx.lineTo(blueX, 190);
-ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(blueX, 70);
+	ctx.lineTo(blueX, 190);
+	ctx.stroke();
 
 /* =========================================================
    BLUE ABSORPTION LINE (GRADIENT DIPS)
 ========================================================= */
 
-const blueGrad = ctx.createLinearGradient(
-    blueX - 4, 0,
-    blueX + 4, 0
+	const blueGrad = ctx.createLinearGradient(
+   	 	blueX - 4, 0,
+    	blueX + 4, 0
 );
 
-blueGrad.addColorStop(0, "rgba(0,0,0,0)");
-blueGrad.addColorStop(0.5, "rgba(0,0,0,1)");
-blueGrad.addColorStop(1, "rgba(0,0,0,0)");
+		blueGrad.addColorStop(0, "rgba(0,0,0,0)");
+		blueGrad.addColorStop(0.5, "rgba(0,0,0,1)");
+		blueGrad.addColorStop(1, "rgba(0,0,0,0)");
 
-ctx.fillStyle = blueGrad;
+	ctx.fillStyle = blueGrad;
 
-ctx.fillRect(
-    blueX - 4,
-    90,
-    24,
-    80
+	ctx.fillRect(
+    	blueX - 4,
+    	90,
+    	24,
+    	80
 );
     /* ---------- LABELS ---------- */
 
