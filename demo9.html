@@ -86,11 +86,11 @@
         if (isWhite) {
             body.addColorStop(0, '#ffffff');
             body.addColorStop(0.4, '#f0f0f0');
-            body.addColorStop(1, '#999999'); // Dark edge
+            body.addColorStop(1, '#444444'); // Dark edge
         } else {
             body.addColorStop(0, '#b0e0ff');
             body.addColorStop(0.4, '#5fbaff');
-            body.addColorStop(1, '##005cb5'); // Dark edge
+            body.addColorStop(1, '#001a33'); // Dark edge
         }
         ctx.fillStyle = body;
         ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
@@ -169,16 +169,6 @@
         Plotly.restyle('lcPlot', { x: [[phase]], y: [[currLight]] }, [1]);
 
         phase = (phase + 0.02) % (2 * Math.PI);
-
-        /* add */
-        // Legends
-        sCtx.fillStyle = "#cbdfff";
-        sCtx.font = "12px Arial";
-        sCtx.textAlign = "left";
-        sCtx.fillText("← Blueshift (Toward)", 50, barY + barH + 60);
-        sCtx.textAlign = "right";
-        sCtx.fillText("Redshift (Away) →", specCanvas.width - 50, barY + barH + 60);
-        /* end */
         requestAnimationFrame(animate);
     }
 
