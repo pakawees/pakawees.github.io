@@ -285,7 +285,7 @@ footer{
         ">
     </canvas>
     <div class="binary-info">
-
+		<h2>"Galyanivadhana"</h2>
     <div class="star-info white-star">
 
         <div class="star-title">
@@ -1184,7 +1184,7 @@ function drawSpectroscopy(obj){
         80
     );
 
-    /* ---------- REST LINE ---------- */
+/*    /* ---------- REST LINE ---------- */
 
     const center =
         canvas.width/2;
@@ -1220,10 +1220,22 @@ function drawSpectroscopy(obj){
 ========================================================= */
 
 /* ---------- WHITE STAR ABSORPTION ---------- */
-
+	
 const whiteX =
     center + whiteShift;
 
+/* =========================================================
+   MOVING WHITE SPECTRAL LINE (CORE LINE)
+========================================================= */
+
+ctx.strokeStyle = "rgba(255, 255, 255, 1)";
+ctx.lineWidth = 1.5;
+
+ctx.beginPath();
+ctx.moveTo(blueX, 70);
+ctx.lineTo(blueX, 190);
+ctx.stroke();
+	
 const whiteGrad =
     ctx.createLinearGradient(
         whiteX-5,0,
@@ -1253,39 +1265,42 @@ ctx.fillRect(
     90,
     20,
     80
-);
+); 
 
+	
 /* ---------- BLUE STAR ABSORPTION ---------- */
 
-const blueX =
-    center + blueShift;
+const blueX = center + blueShift;
 
-const blueGrad =
-    ctx.createLinearGradient(
-        blueX-4,0,
-        blueX+4,0
-    );
+/* =========================================================
+   MOVING BLUE SPECTRAL LINE (CORE LINE)
+========================================================= */
 
-blueGrad.addColorStop(
-    0,
-    "rgba(0,0,0,0)"
+ctx.strokeStyle = "rgba(120, 200, 255, 1)";
+ctx.lineWidth = 1.5;
+
+ctx.beginPath();
+ctx.moveTo(blueX, 70);
+ctx.lineTo(blueX, 190);
+ctx.stroke();
+
+/* =========================================================
+   BLUE ABSORPTION LINE (GRADIENT DIPS)
+========================================================= */
+
+const blueGrad = ctx.createLinearGradient(
+    blueX - 4, 0,
+    blueX + 4, 0
 );
 
-blueGrad.addColorStop(
-    0.5,
-    "rgba(0,0,0,1)"
-);
+blueGrad.addColorStop(0, "rgba(0,0,0,0)");
+blueGrad.addColorStop(0.5, "rgba(0,0,0,1)");
+blueGrad.addColorStop(1, "rgba(0,0,0,0)");
 
-blueGrad.addColorStop(
-    1,
-    "rgba(0,0,0,0)"
-);
-
-ctx.fillStyle =
-    blueGrad;
+ctx.fillStyle = blueGrad;
 
 ctx.fillRect(
-    blueX-4,
+    blueX - 4,
     90,
     24,
     80
