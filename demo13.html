@@ -135,12 +135,12 @@
         // ชิดซ้าย: Blue
         sCtx.textAlign = "left";
         sCtx.fillStyle = "#66ccff";
-        sCtx.fillText("← BLUESHIFT (Toward)", 20, 80);
+        sCtx.fillText("← BLUESHIFT (Toward)", sX + 15, 80);
 
         // ชิดขวา: Red
         sCtx.textAlign = "right";
         sCtx.fillStyle = "#ff4d4d";
-        sCtx.fillText("REDSHIFT (Away) →", sCanvas.width - 20, 80);
+        sCtx.fillText("REDSHIFT (Away) →", sCanvas.width - (sX + 15), 80);
 
         // --- วาด Indicator (เฉพาะเส้นและตัวเลขที่เลื่อน) ---
         const drawShift = (vel, color) => {
