@@ -93,12 +93,12 @@
     }
 
     function drawIndicator(ctx, x, yStart, yEnd, color, velocity) {
-        const overshoot = 25;
+        const overshoot = 15;
         ctx.strokeStyle = "rgba(0,0,0,0.9)"; ctx.lineWidth = 7;
         ctx.beginPath(); ctx.moveTo(x, yStart); ctx.lineTo(x, yEnd); ctx.stroke();
         ctx.strokeStyle = color; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.moveTo(x, yStart - overshoot); ctx.lineTo(x, yEnd + overshoot); ctx.stroke();
-        ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, yStart - overshoot, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, yStart - overshoot, 5, 0, Math.PI * 2); ctx.fill();
         
         ctx.font = "bold 12px monospace"; ctx.textAlign = "center";
         ctx.fillStyle = velocity > 0 ? "#ff6666" : (velocity < 0 ? "#66ccff" : "#ffffff");
