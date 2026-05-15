@@ -1245,19 +1245,6 @@ whiteGrad.addColorStop(
     "rgba(0,0,0,0)"
 );
 
-const whiteCore =
-	ctx.strokeStyle =
-        "rgba(255,255,255,0.9)";
-
-ctx.lineWidth = 2;
-
-ctx.beginPath();
-
-ctx.moveTo(center,70);
-ctx.lineTo(center,190);
-
-ctx.stroke();
-
 ctx.fillStyle =
     whiteGrad;
 
@@ -1267,6 +1254,16 @@ ctx.fillRect(
     20,
     80
 );
+
+const whiteCore =
+	ctx.strokeStyle =
+        "rgba(255,255,255,0.9)";
+
+ctx.lineWidth = 1;
+
+ctx.beginPath();
+
+ctx.stroke();
 
 /* ---------- BLUE STAR ABSORPTION ---------- */
 
@@ -1303,6 +1300,17 @@ ctx.fillRect(
     24,
     80
 );
+
+const blueCore =
+	ctx.strokeStyle =
+        "rgba(0, 150, 255, 0.9)";
+
+ctx.lineWidth = 1;
+
+ctx.beginPath();
+
+ctx.stroke();
+	
     /* ---------- LABELS ---------- */
 
     ctx.font =
