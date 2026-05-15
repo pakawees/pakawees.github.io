@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Binary Lab - Fixed Sync & Scaling</title>
+    <title>Binary Lab - Fully Operational</title>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <style>
         body { margin: 0; background: #050a18; color: #7fd4ff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; }
@@ -23,7 +23,7 @@
 <body>
 
 <div class="dashboard">
-    <h2 style="text-align:center; color:#fff; margin-top:0;">Barycentric Orbit Simulator (Synced)</h2>
+    <h2 style="text-align:center; color:#fff; margin-top:0;">Barycentric Orbit Simulator (Light Curve Fixed)</h2>
     
     <div class="master-controls">
         <div class="ctrl-group">
@@ -37,10 +37,10 @@
             
             <div class="input-row" style="margin-top:10px;">
                 <span>Inclination:</span>
-                <input type="number" id="incNum" class="manual-input" value="60" min="0" max="90" step="1">
+                <input type="number" id="incNum" class="manual-input" value="88" min="0" max="90" step="1">
                 <span>°</span>
             </div>
-            <input type="range" id="incRange" min="0" max="90" value="60" step="1" style="width:100%">
+            <input type="range" id="incRange" min="0" max="90" value="88" step="1" style="width:100%">
             
             <div id="physicsReadout" class="data-readout" style="color:#0f0;"></div>
         </div>
@@ -89,9 +89,8 @@
 <script>
     const oCtx = document.getElementById('orbit').getContext('2d');
     const sCtx = document.getElementById('spec').getContext('2d');
-    let phase = 0, system = { dist: 2.0, inc: 60, period: 1 }, stars = { a: {}, b: {} };
+    let phase = 0, system = { dist: 2.0, inc: 88, period: 1 }, stars = { a: {}, b: {} };
 
-    // แก้ไขการ Sync: ให้ทั้งสองทางเรียก updateDynamics ทันที
     function setupSync(numId, rangeId) {
         const num = document.getElementById(numId);
         const range = document.getElementById(rangeId);
@@ -107,6 +106,31 @@
         return { mass: m, temp: tempMap[sClass], radius: r, color: colorMap[sClass], lum: Math.pow(r,2)*Math.pow(tempMap[sClass]/5800,4) };
     }
 
+    // ฟังก์ชันคำนวณแสงที่หายไป (สำคัญมาก)
+    function calcLight(p) {
+        const iRad = system.inc * Math.PI / 180;
+        const totalDist = stars.a.visRadius + stars.b.visRadius;
+        
+        // คำนวณระยะห่างปรากฏของดาวสองดวงบนระนาบฟ้า
+        const dx = totalDist * Math.cos(p);
+        const dy = totalDist * Math.sin(p) * Math.cos(iRad);
+        const sep = Math.sqrt(dx*dx + dy*dy);
+        
+        const r_sum = (stars.a.radius + stars.b.radius) * 1.5; // Scale สำหรับการบังกัน
+        const totalL = stars.a.lum + stars.b.lum;
+
+        if (sep < r_sum) {
+            const overlap = Math.max(0, (r_sum - sep) / r_sum);
+            // ตรวจสอบว่าดวงไหนอยู่หน้า (xA > 0 หรือ xB > 0 ขึ้นกับเฟส)
+            if (Math.sin(p) > 0) {
+                return (totalL - (stars.b.lum * overlap * 0.8)) / totalL; // บังดวง B
+            } else {
+                return (totalL - (stars.a.lum * overlap * 0.8)) / totalL; // บังดวง A
+            }
+        }
+        return 1.0;
+    }
+
     function updateDynamics() {
         system.dist = parseFloat(document.getElementById('distNum').value) || 0.1;
         system.inc = parseFloat(document.getElementById('incNum').value) || 0;
@@ -117,22 +141,15 @@
         const totalM = stars.a.mass + stars.b.mass;
         system.period = Math.sqrt(Math.pow(system.dist, 3) / totalM);
         
-        // คำนวณรัศมีวงโคจรจริงใน Canvas (Scale ตามค่า a)
-        const visualScale = 160 / (system.dist + 1); // ปรับ Scale ให้นิ่งขึ้น
+        const visualScale = 160 / (system.dist + 1); 
         stars.a.visRadius = system.dist * (stars.b.mass / totalM) * visualScale;
         stars.b.visRadius = system.dist * (stars.a.mass / totalM) * visualScale;
 
-        // ความเร็ววงโคจร
         const v_total = (2 * Math.PI * system.dist * 1.496e8) / (system.period * 3.154e7);
         stars.a.v_orb = v_total * (stars.b.mass / totalM);
         stars.b.v_orb = v_total * (stars.a.mass / totalM);
 
         document.getElementById('physicsReadout').innerHTML = `Period: ${system.period.toFixed(2)} yrs | V_total: ${v_total.toFixed(1)} km/s`;
-        const updateRead = (id, s) => { 
-            document.getElementById(id).innerHTML = `Mass: ${s.mass} M⊙<br>Orbit: ${(s.visRadius/visualScale).toFixed(2)} AU<br>V_orb: ${s.v_orb.toFixed(1)} km/s`; 
-            document.getElementById(id).style.color = s.color; 
-        };
-        updateRead('starAReadout', stars.a); updateRead('starBReadout', stars.b);
         updateStaticPlots();
     }
 
@@ -141,14 +158,11 @@
         const cosI = Math.cos(iRad);
         oCtx.clearRect(0,0,500,300); sCtx.clearRect(0,0,500,300);
 
-        // Barycenter
         oCtx.fillStyle = "white"; oCtx.beginPath(); oCtx.arc(250,150,2,0,7); oCtx.fill();
 
-        // Position
         const xA = Math.cos(phase)*stars.a.visRadius, yA = Math.sin(phase)*stars.a.visRadius*cosI;
         const xB = Math.cos(phase+Math.PI)*stars.b.visRadius, yB = Math.sin(phase+Math.PI)*stars.b.visRadius*cosI;
 
-        // Draw Orbits
         oCtx.setLineDash([3, 5]); oCtx.strokeStyle = "#1a2a44";
         oCtx.beginPath(); oCtx.ellipse(250,150,stars.a.visRadius,stars.a.visRadius*cosI,0,0,7); oCtx.stroke();
         oCtx.beginPath(); oCtx.ellipse(250,150,stars.b.visRadius,stars.b.visRadius*cosI,0,0,7); oCtx.stroke();
@@ -162,9 +176,9 @@
         if(Math.sin(phase)>0){ drawS(xB, yB, stars.b.radius, stars.b.color); drawS(xA, yA, stars.a.radius, stars.a.color); }
         else { drawS(xA, yA, stars.a.radius, stars.a.color); drawS(xB, yB, stars.b.radius, stars.b.color); }
 
-        // Spectrum Line
         const vA_obs = stars.a.v_orb * Math.sin(iRad) * Math.sin(phase);
         const vB_obs = -stars.b.v_orb * Math.sin(iRad) * Math.sin(phase);
+        
         const grad = sCtx.createLinearGradient(50,0,450,0); grad.addColorStop(0,"blue"); grad.addColorStop(0.5,"white"); grad.addColorStop(1,"red");
         sCtx.fillStyle = grad; sCtx.fillRect(50, 100, 400, 80);
         const drawL = (v, s) => { sCtx.strokeStyle = s.color; sCtx.lineWidth=3; sCtx.beginPath(); sCtx.moveTo(250+v, 95); sCtx.lineTo(250+v, 185); sCtx.stroke(); };
@@ -172,23 +186,33 @@
 
         if(window.Plotly) {
             const d = (phase*180/Math.PI)%360;
-            Plotly.restyle('rv', { x:[[d],[d]], y:[[vA_obs],[vB_obs]] }, [2,3]);
+            const currentLight = calcLight(phase);
+            Plotly.restyle('lc', { x: [[d]], y: [[currentLight]] }, [1]);
+            Plotly.restyle('rv', { x: [[d], [d]], y: [[vA_obs], [vB_obs]] }, [2, 3]);
         }
         phase += 0.04 / (system.period + 0.1);
         requestAnimationFrame(animate);
     }
 
     function updateStaticPlots() {
-        let x=[], yA=[], yB=[]; const si = Math.sin(system.inc*Math.PI/180);
-        for(let i=0; i<=360; i+=5){ x.push(i); yA.push(stars.a.v_orb*si*Math.sin(i*Math.PI/180)); yB.push(-stars.b.v_orb*si*Math.sin(i*Math.PI/180)); }
-        Plotly.restyle('rv', {x:[x,x], y:[yA,yB]}, [0,1]);
+        let x = [], yL = [], yA = [], yB = [];
+        const si = Math.sin(system.inc * Math.PI / 180);
+        for (let i = 0; i <= 360; i += 2) {
+            let p = i * Math.PI / 180;
+            x.push(i);
+            yL.push(calcLight(p));
+            yA.push(stars.a.v_orb * si * Math.sin(p));
+            yB.push(-stars.b.v_orb * si * Math.sin(p));
+        }
+        Plotly.restyle('lc', { x: [x], y: [yL] }, [0]); 
+        Plotly.restyle('rv', { x: [x, x], y: [yA, yB] }, [0, 1]);
     }
 
     window.onload = () => {
         setupSync('distNum', 'distRange');
         setupSync('incNum', 'incRange');
         const layout = { paper_bgcolor:'black', plot_bgcolor:'#050a18', margin:{t:30,b:35,l:45,r:15}, font:{color:'#7fd4ff', size:10}, xaxis:{gridcolor:'#1a2a44', range:[0,360]}, yaxis:{gridcolor:'#1a2a44', fixedrange:true}};
-        Plotly.newPlot('lc', [{x:[], y:[], name:'Flux', line:{color:'yellow'}}, {x:[0], y:[1], mode:'markers', name:'Now'}], {...layout, yaxis:{range:[0.1, 1.1]}});
+        Plotly.newPlot('lc', [{x:[], y:[], name:'Flux', line:{color:'yellow'}}, {x:[0], y:[1], mode:'markers', marker:{color:'red'}, name:'Now'}], {...layout, yaxis:{range:[0.5, 1.1]}});
         Plotly.newPlot('rv', [{x:[], y:[], name:'RV A'}, {x:[], y:[], name:'RV B'}, {x:[0], y:[0], mode:'markers'}, {x:[0], y:[0], mode:'markers'}], {...layout, yaxis:{range:[-300, 300]}});
         document.querySelectorAll('select').forEach(e => e.onchange = updateDynamics);
         updateDynamics(); animate();
