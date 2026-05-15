@@ -1199,78 +1199,41 @@ function drawSpectroscopy(obj){
     ctx.moveTo(center,70);
     ctx.lineTo(center,190);
 
-    ctx.stroke();
+    ctx.stroke(); 
+	
 
-    /* ---------- DOPPLER SHIFT ---------- */
+	/* ---------- DOPPLER SHIFT (FIXED) ---------- */
 
-    const amp =
-        55 * Math.sin(inc);
+	const amp = 120;
+	const shift = Math.sin(phaseAngle) * amp;
 
-    const shift =
-        Math.sin(phaseAngle) * amp;
+	const whiteX = center + shift * 0.6;
+	const blueX  = center - shift;
+	
+	/* ---------- WHITE CORE ---------- */
 
-    const whiteShift =
-        shift * 0.6;
+	ctx.shadowBlur = 8;
+	ctx.shadowColor = "#ffffff";
 
-    const blueShift =
-        -shift;
+	ctx.strokeStyle = "#ffffff";
+	ctx.lineWidth = 1.5;
 
-   /* =========================================================
-   ABSORPTION LINES
-========================================================= */
+	ctx.beginPath();
+	ctx.moveTo(whiteX, 70);
+	ctx.lineTo(whiteX, 190);
+	ctx.stroke();
 
-/* ---------- WHITE ABSORPTION ---------- */
+/* ---------- BLUE CORE ---------- */
 
-    const whiteGrad = ctx.createLinearGradient(
-      whiteX - 5, 0,
-      whiteX + 5, 0
-    );
+	ctx.strokeStyle = "#66ccff";
 
-    whiteGrad.addColorStop(0, "rgba(0,0,0,0)");
-    whiteGrad.addColorStop(0.5, "rgba(0,0,0,0.92)");
-    whiteGrad.addColorStop(1, "rgba(0,0,0,0)");
-
-    ctx.fillStyle = whiteGrad;
-    ctx.fillRect(whiteX - 5, 90, 20, 80);
-
-/* ---------- WHITE CORE LINE ---------- */
-
-	    ctx.strokeStyle = "rgba(255,255,255,0.9)";
-    ctx.lineWidth = 1.2;
-
-    ctx.beginPath();
-    ctx.moveTo(whiteX, 70);
-    ctx.lineTo(whiteX, 190);
-    ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(blueX, 70);
+	ctx.lineTo(blueX, 190);
+	ctx.stroke();
 
 	ctx.shadowBlur = 10;
 	ctx.shadowColor = "#ffffff";
-
-/* ---------- BLUE ABSORPTION ---------- */
-
-    const blueGrad = ctx.createLinearGradient(
-      blueX - 4, 0,
-      blueX + 4, 0
-  );
-
-    blueGrad.addColorStop(0, "rgba(0,0,0,0)");
-    blueGrad.addColorStop(0.5, "rgba(0,0,0,1)");
-    blueGrad.addColorStop(1, "rgba(0,0,0,0)");
-
-    ctx.fillStyle = blueGrad;
-    ctx.fillRect(blueX - 4, 90, 24, 80);
-
-	/* ---------- BLUE CORE LINE ---------- */
-
-    ctx.strokeStyle = "rgba(120,200,255,0.9)";
-    ctx.lineWidth = 1.2;
-
-    ctx.beginPath();
-    ctx.moveTo(blueX, 70);
-    ctx.lineTo(blueX, 190);
-	ctx.shadowBlur = 10;
-	ctx.shadowColor = "#66ccff";
-    ctx.stroke();
 	
     /* ---------- LABELS ---------- */
 
