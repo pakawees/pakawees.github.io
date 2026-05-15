@@ -1211,7 +1211,7 @@ function drawSpectroscopy(obj){
 	const blueX  = center - shift;
 	
 	/* ---------- WHITE CORE ---------- */
-
+	ctx.save();
 	ctx.shadowBlur = 8;
 	ctx.shadowColor = "#ffffff";
 
@@ -1222,9 +1222,10 @@ function drawSpectroscopy(obj){
 	ctx.moveTo(whiteX, 70);
 	ctx.lineTo(whiteX, 190);
 	ctx.stroke();
+	ctx.restore();  
 
 /* ---------- BLUE CORE ---------- */
-
+	ctx.save();
 	ctx.shadowBlur = 8;
 	ctx.shadowColor = "#ffffff";
 	
@@ -1234,6 +1235,7 @@ function drawSpectroscopy(obj){
 	ctx.moveTo(blueX, 70);
 	ctx.lineTo(blueX, 190);
 	ctx.stroke();
+	ctx.restore();  
 	
     /* ---------- LABELS ---------- */
 
