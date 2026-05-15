@@ -5,7 +5,7 @@
     <title>Advanced Binary Star Lab - demo15</title>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <style>
-        body { margin: 0; background: #050a18; color: #7fd4ff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; }
+        body { margin: 0; background: #050a18; color: #7fd4ff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; }
         .dashboard { width: 98%; max-width: 1200px; margin: 15px; background: #0a1128; border: 1px solid #1a2a44; border-radius: 10px; padding: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
         .master-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; background: rgba(127, 212, 255, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(127, 212, 255, 0.1); font-size: 0.9em; }
         .ctrl-group { display: flex; flex-direction: column; gap: 8px; border-right: 1px solid rgba(127, 212, 255, 0.1); padding: 0 10px; }
@@ -13,26 +13,28 @@
         .viz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         canvas { width: 100%; background: #000; border: 1px solid #1a2a44; border-radius: 5px; }
         .plot-container { height: 260px; background: #000; border-radius: 5px; }
-        .data-readout { font-family: monospace; font-size: 0.8em; color: #0f0; margin-top: 5px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px; }
+        .data-readout { font-family: monospace; font-size: 0.8em; color: #0f0; margin-top: 5px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px; line-height: 1.4; }
         select, input { background: #1a2a44; color: #fff; border: 1px solid #7fd4ff; border-radius: 3px; padding: 2px; }
+        h2 { text-align: center; margin-top: 0; color: #fff; text-transform: uppercase; letter-spacing: 2px; }
+        .label-text { font-weight: bold; color: #ffcc00; margin-bottom: 5px; display: block; }
     </style>
 </head>
 <body>
 
 <div class="dashboard">
-    <h2 style="text-align:center; margin-top:0; color:#fff; letter-spacing:1px;">BINARY SYSTEM DYNAMICS</h2>
+    <h2>Binary Star Physics Lab (AU Based)</h2>
     
     <div class="master-controls">
         <div class="ctrl-group">
-            <b style="color:#ffcc00">SYSTEM PHYSICS</b>
+            <span class="label-text">SYSTEM PARAMETERS</span>
             <div>Distance: <input type="range" id="distAU" min="0.1" max="10" value="1.0" step="0.1"> <span id="auVal">1.0</span> AU</div>
             <div>Inclination: <input type="range" id="inc" min="0" max="90" value="88"> <span id="incVal">88</span>°</div>
-            <div id="physicsReadout" class="data-readout">Calculating dynamics...</div>
+            <div id="physicsReadout" class="data-readout">---</div>
         </div>
 
         <div class="ctrl-group">
-            <b style="color:#fff">STAR A (Secondary)</b>
-            <div>Spectral: 
+            <span class="label-text">STAR A (Secondary)</span>
+            <div>Class: 
                 <select id="classA">
                     <option value="O">O</option><option value="B">B</option><option value="A">A</option>
                     <option value="F" selected>F</option><option value="G">G</option><option value="K">K</option><option value="M">M</option>
@@ -48,8 +50,8 @@
         </div>
 
         <div class="ctrl-group">
-            <b style="color:#fff">STAR B (Primary)</b>
-            <div>Spectral: 
+            <span class="label-text">STAR B (Primary)</span>
+            <div>Class: 
                 <select id="classB">
                     <option value="O">O</option><option value="B" selected>B</option><option value="A">A</option>
                     <option value="F">F</option><option value="G">G</option><option value="K">K</option><option value="M">M</option>
@@ -66,8 +68,8 @@
     </div>
 
     <div class="viz-grid">
-        <canvas id="orbit" width="500" height="300"></canvas>
-        <canvas id="spec" width="500" height="300"></canvas>
+        <div><span class="label-text">Orbital Visualization</span><canvas id="orbit" width="500" height="300"></canvas></div>
+        <div><span class="label-text">Spectroscopic Doppler Shift</span><canvas id="spec" width="500" height="300"></canvas></div>
         <div id="lc" class="plot-container"></div>
         <div id="rv" class="plot-container"></div>
     </div>
@@ -76,26 +78,21 @@
 <script>
     const oCtx = document.getElementById('orbit').getContext('2d');
     const sCtx = document.getElementById('spec').getContext('2d');
-    
     let phase = 0;
     let system = { dist: 1.0, inc: 88, velocity: 0, period: 0 };
     let stars = { a: {}, b: {} };
 
-    // อ้างอิงมวลและอุณหภูมิตาม Spectral Class (Solar units)
+    // Physics Engine: Spectral Class to Mass/Temp/Radius
     function getAstroData(sClass, sub, type) {
-        const massMap = { O: 40, B: 10, A: 2.1, F: 1.4, G: 1.0, K: 0.8, M: 0.4 };
-        const tempMap = { O: 35000, B: 20000, A: 9000, F: 7000, G: 5600, K: 4500, M: 3200 };
+        const massMap = { O: 45, B: 12, A: 2.2, F: 1.4, G: 1.0, K: 0.8, M: 0.4 };
+        const tempMap = { O: 38000, B: 22000, A: 9200, F: 7200, G: 5700, K: 4600, M: 3300 };
         
         let mass = massMap[sClass] * (1 - sub/20);
         let temp = tempMap[sClass] * (1 - sub/20);
-        let radius = (type === "V") ? Math.pow(mass, 0.8) : (type === "III" ? 6.5 : 50);
+        // Radius based on Mass-Radius relation for Main Sequence, or fixed for Giants
+        let radius = (type === "V") ? Math.pow(mass, 0.75) : (type === "III" ? 7.0 : 60);
 
-        let color = "#fff";
-        if(temp > 20000) color = "#9bb2ff";
-        else if(temp > 8000) color = "#f8f7ff";
-        else if(temp > 5000) color = "#fff2a1";
-        else color = "#ff6060";
-
+        let color = temp > 25000 ? "#9bb2ff" : (temp > 9000 ? "#cad7ff" : (temp > 6000 ? "#f8f7ff" : (temp > 4500 ? "#fff2a1" : "#ff6060")));
         return { mass, temp, radius, color };
     }
 
@@ -108,37 +105,35 @@
         stars.a = getAstroData(document.getElementById('classA').value, document.getElementById('subA').value, document.getElementById('typeA').value);
         stars.b = getAstroData(document.getElementById('classB').value, document.getElementById('subB').value, document.getElementById('typeB').value);
 
-        // Kepler's 3rd Law: P^2 = a^3 / M_total (P in years, a in AU, M in Solar Mass)
+        // Kepler's 3rd Law: P (yrs) = sqrt(a^3 / M_tot)
         let totalM = stars.a.mass + stars.b.mass;
-        system.period = Math.sqrt(Math.pow(system.dist, 3) / totalM); // Years
+        system.period = Math.sqrt(Math.pow(system.dist, 3) / totalM);
         
-        // Velocity (km/s) = (2 * pi * a) / P -> ในหน่วย Solar/AU แปลงเป็น km/s ประมาณนี้:
-        system.velocity = (30 * Math.sqrt(totalM / system.dist)); // 30 km/s คือความเร็วโลก
+        // Orbital velocity in km/s (approx: 30 * sqrt(M_tot / a))
+        system.velocity = (30 * Math.sqrt(totalM / system.dist));
 
-        // Update Readouts
-        document.getElementById('physicsReadout').innerHTML = `Period: ${system.period.toFixed(2)} yrs<br>Avg Vel: ${system.velocity.toFixed(1)} km/s`;
-        document.getElementById('starAReadout').innerHTML = `Mass: ${stars.a.mass.toFixed(1)} M⊙<br>Temp: ${stars.a.temp.toFixed(0)} K`;
-        document.getElementById('starBReadout').innerHTML = `Mass: ${stars.b.mass.toFixed(1)} M⊙<br>Temp: ${stars.b.temp.toFixed(0)} K`;
-
+        document.getElementById('physicsReadout').innerHTML = `Orbital Period: ${system.period.toFixed(3)} yrs<br>System Velocity: ${system.velocity.toFixed(1)} km/s`;
+        document.getElementById('starAReadout').innerHTML = `Mass: ${stars.a.mass.toFixed(1)} M⊙ | Radius: ${stars.a.radius.toFixed(1)} R⊙`;
+        document.getElementById('starBReadout').innerHTML = `Mass: ${stars.b.mass.toFixed(1)} M⊙ | Radius: ${stars.b.radius.toFixed(1)} R⊙`;
+        
         updateStaticPlots();
     }
 
+    // Stefan-Boltzmann Flux calculation for Light Curve
     function calcLight(p) {
         const incRad = system.inc * Math.PI / 180;
         const x = Math.cos(p), y = Math.sin(p) * Math.cos(incRad);
         const dist = Math.sqrt(x*x + y*y);
         
-        // Stefan-Boltzmann Flux: L = R^2 * T^4
         const L_a = Math.pow(stars.a.radius, 2) * Math.pow(stars.a.temp/5800, 4);
         const L_b = Math.pow(stars.b.radius, 2) * Math.pow(stars.b.temp/5800, 4);
         const totalL = L_a + L_b;
 
-        // Visual radius scaling for eclipse
         const r1 = stars.a.radius * 0.02, r2 = stars.b.radius * 0.02;
         if (dist < (r1 + r2)) {
             const overlap = Math.max(0, (r1 + r2 - dist) / (r1 + r2));
-            if (Math.sin(p) > 0) return (totalL - (L_b * overlap * 0.7)) / totalL;
-            else return (totalL - (L_a * overlap * 0.7)) / totalL;
+            if (Math.sin(p) > 0) return (totalL - (L_b * overlap * 0.75)) / totalL; // Secondary Eclipse
+            else return (totalL - (L_a * overlap * 0.75)) / totalL; // Primary Eclipse
         }
         return 1.0;
     }
@@ -146,21 +141,22 @@
     function animate() {
         const incRad = system.inc * Math.PI / 180;
         oCtx.clearRect(0,0,500,300); sCtx.clearRect(0,0,500,300);
-
-        // Orbit Circle
         const orbitScale = 100;
+        
+        // Draw Orbit Path
         oCtx.strokeStyle = "rgba(127,212,255,0.1)";
-        oCtx.beginPath(); oCtx.ellipse(250,150, orbitScale, orbitScale*Math.cos(incRad), 0, 0, Math.PI*2); oCtx.stroke();
+        oCtx.lineWidth = 1;
+        oCtx.beginPath(); oCtx.ellipse(250, 150, orbitScale, orbitScale*Math.cos(incRad), 0, 0, Math.PI*2); oCtx.stroke();
 
         const x = Math.cos(phase)*orbitScale, y = Math.sin(phase)*orbitScale*Math.cos(incRad);
         
-        // Stars
         const drawS = (ctx, x, y, r, col) => {
             ctx.shadowBlur = 15; ctx.shadowColor = col; ctx.fillStyle = col;
             ctx.beginPath(); ctx.arc(x,y, Math.max(3, Math.min(30, r*0.5)), 0, 7); ctx.fill();
             ctx.shadowBlur = 0;
         };
 
+        // Z-order sorting for stars
         if(Math.sin(phase) > 0) {
             drawS(oCtx, 250-x, 150-y, stars.b.radius, stars.b.color);
             drawS(oCtx, 250+x, 150+y, stars.a.radius, stars.a.color);
@@ -169,12 +165,15 @@
             drawS(oCtx, 250-x, 150-y, stars.b.radius, stars.b.color);
         }
 
-        // Spectroscopy (Doppler Shift)
+        // Doppler Shift Rendering
         const shiftA = (stars.b.mass / (stars.a.mass + stars.b.mass)) * system.velocity * Math.sin(incRad) * Math.sin(phase);
         const shiftB = -(stars.a.mass / (stars.a.mass + stars.b.mass)) * system.velocity * Math.sin(incRad) * Math.sin(phase);
 
         sCtx.fillStyle = stars.a.color; sCtx.fillRect(250 + shiftA*1.5, 100, 3, 100);
         sCtx.fillStyle = stars.b.color; sCtx.fillRect(250 + shiftB*1.5, 100, 3, 100);
+        
+        sCtx.fillStyle = "#fff"; sCtx.font = "10px monospace";
+        sCtx.fillText("<- BLUESHIFT", 20, 50); sCtx.fillText("REDSHIFT ->", 400, 50);
 
         if(window.Plotly) {
             const deg = (phase*180/Math.PI)%360;
@@ -182,21 +181,36 @@
             Plotly.restyle('lc', {x:[[deg]], y:[[calcLight(phase)]]}, [1]);
         }
 
-        // ความเร็วอนิเมชั่นจะสัมพันธ์กับ Period (ถ้าดาวห่างกันมาก จะหมุนช้าลง)
+        // Phase speed relative to Period
         phase += 0.05 / (system.period + 0.1);
         requestAnimationFrame(animate);
     }
 
     function init() {
-        const layout = { paper_bgcolor:'black', plot_bgcolor:'#050a18', margin:{t:10,b:35,l:40,r:10}, font:{color:'#7fd4ff', size:10}, xaxis:{gridcolor:'#1a2a44'}, yaxis:{gridcolor:'#1a2a44'} };
-        Plotly.newPlot('lc', [{x:[], y:[], name:'Flux', line:{color:'yellow'}}, {x:[0], y:[1], mode:'markers', marker:{color:'red'}}], layout);
+        const commonLayout = { 
+            paper_bgcolor:'black', plot_bgcolor:'#050a18', 
+            margin:{t:30,b:35,l:45,r:15}, font:{color:'#7fd4ff', size:10},
+            xaxis:{gridcolor:'#1a2a44', range:[0,360], title:'Orbital Phase (deg)'}, 
+            yaxis:{gridcolor:'#1a2a44', fixedrange: true}
+        };
+
+        // Light Curve Plot
+        Plotly.newPlot('lc', [
+            {x:[], y:[], name: 'Relative Flux', line:{color:'yellow', width:2}}, 
+            {x:[0], y:[1], mode:'markers', marker:{color:'red', size:8}, name: 'Current'}
+        ], { ...commonLayout, title: 'Photometry (Light Curve)', yaxis: { ...commonLayout.yaxis, range: [0.25, 1.1] } });
+
+        // Radial Velocity Plot
         Plotly.newPlot('rv', [
-            {x:[], y:[], name:'RV A', line:{dash:'dot', width:1}}, {x:[], y:[], name:'RV B', line:{dash:'dot', width:1}},
-            {x:[0], y:[0], mode:'markers', name:'A'}, {x:[0], y:[0], mode:'markers', name:'B'}
-        ], layout);
+            {x:[], y:[], name:'Orbit A', line:{dash:'dot', width:1, color:'rgba(255,255,255,0.3)'}}, 
+            {x:[], y:[], name:'Orbit B', line:{dash:'dot', width:1, color:'rgba(102,204,255,0.3)'}},
+            {x:[0], y:[0], mode:'markers', marker:{size:8}, name:'Star A'}, 
+            {x:[0], y:[0], mode:'markers', marker:{size:8}, name:'Star B'}
+        ], { ...commonLayout, title: 'Spectroscopy (RV Curve)', yaxis: { ...commonLayout.yaxis, range: [-180, 180], title: 'RV (km/s)' } });
         
         document.querySelectorAll('input, select').forEach(el => el.oninput = updateDynamics);
-        updateDynamics(); animate();
+        updateDynamics(); 
+        animate();
     }
 
     function updateStaticPlots() {
