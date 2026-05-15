@@ -2,104 +2,205 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Binary Star Lab - demo14</title>
+    <title>Astro-Physical Binary Lab (demo15)</title>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <style>
         body { margin: 0; background: #050a18; color: #7fd4ff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
-        .dashboard { width: 95%; max-width: 1200px; margin: 20px; background: #0a1128; border: 1px solid #1a2a44; border-radius: 10px; padding: 20px; }
-        .controls { display: flex; flex-wrap: wrap; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .viz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .dashboard { width: 98%; max-width: 1200px; margin: 20px; background: #0a1128; border: 1px solid #1a2a44; border-radius: 10px; padding: 20px; }
+        .master-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85em; }
+        .ctrl-group { display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #1a2a44; padding: 0 10px; }
+        .ctrl-group:last-child { border-right: none; }
+        .viz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         canvas { width: 100%; background: #000; border: 1px solid #1a2a44; border-radius: 5px; }
-        .plot-container { height: 250px; background: #000; border-radius: 5px; }
-        input { background: #1a2a44; color: #fff; border: 1px solid #7fd4ff; padding: 2px; }
+        .plot-container { height: 280px; background: #000; border-radius: 5px; }
+        select, input { background: #1a2a44; color: #fff; border: 1px solid #7fd4ff; border-radius: 3px; }
     </style>
 </head>
 <body>
 
 <div class="dashboard">
-    <h2 style="text-align:center">Binary Star Lab (demo14)</h2>
+    <h2 style="text-align:center; margin-top:0;">Binary Star Physics Simulator</h2>
     
-    <div class="controls">
-        <div>Inclination: <input type="range" id="inc" min="0" max="90" value="88"></div>
-        <div>Star A Color: <input type="color" id="cA" value="#ffffff"></div>
-        <div>Star B Color: <input type="color" id="cB" value="#66ccff"></div>
+    <div class="master-controls">
+        <div class="ctrl-group">
+            <b style="color:#fff">SYSTEM</b>
+            <div>Inclination: <input type="range" id="inc" min="0" max="90" value="88"> <span id="incVal">88</span>°</div>
+        </div>
+
+        <div class="ctrl-group">
+            <b style="color:#fff">STAR A (Secondary)</b>
+            <div>Class: 
+                <select id="classA">
+                    <option value="O">O</option><option value="B">B</option><option value="A">A</option>
+                    <option value="F" selected>F</option><option value="G">G</option><option value="K">K</option><option value="M">M</option>
+                </select>
+                Sub: <input type="number" id="subA" min="0" max="9.9" value="0" step="0.1" style="width:40px">
+            </div>
+            <div>Type: 
+                <select id="typeA">
+                    <option value="0">0 (Hypergiant)</option><option value="I">I (Supergiant)</option>
+                    <option value="III" selected>III (Giant)</option><option value="V">V (Dwarf)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="ctrl-group">
+            <b style="color:#fff">STAR B (Primary)</b>
+            <div>Class: 
+                <select id="classB">
+                    <option value="O">O</option><option value="B" selected>B</option><option value="A">A</option>
+                    <option value="F">F</option><option value="G">G</option><option value="K">K</option><option value="M">M</option>
+                </select>
+                Sub: <input type="number" id="subB" min="0" max="9.9" value="1.7" step="0.1" style="width:40px">
+            </div>
+            <div>Type: 
+                <select id="typeB">
+                    <option value="0">0</option><option value="I">I</option>
+                    <option value="III">III</option><option value="V" selected>V (Dwarf)</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <div class="viz-grid">
-        <canvas id="orbit" width="500" height="300"></canvas>
-        <canvas id="spec" width="500" height="300"></canvas>
+        <canvas id="orbit" width="500" height="320"></canvas>
+        <canvas id="spec" width="500" height="320"></canvas>
         <div id="lc" class="plot-container"></div>
         <div id="rv" class="plot-container"></div>
     </div>
 </div>
 
 <script>
-    // ตั้งค่าเริ่มต้น
-    const oCanvas = document.getElementById('orbit');
-    const sCanvas = document.getElementById('spec');
-    const oCtx = oCanvas.getContext('2d');
-    const sCtx = sCanvas.getContext('2d');
+    const oCtx = document.getElementById('orbit').getContext('2d');
+    const sCtx = document.getElementById('spec').getContext('2d');
     
     let phase = 0;
-    let config = { inc: 88, colorA: "#ffffff", colorB: "#66ccff" };
+    let stars = { a: {}, b: {}, inc: 88 };
 
-    document.getElementById('inc').oninput = (e) => { config.inc = e.target.value; updateStatic(); };
-    document.getElementById('cA').oninput = (e) => config.colorA = e.target.value;
-    document.getElementById('cB').oninput = (e) => config.colorB = e.target.value;
+    // ฟังก์ชันคำนวณฟิสิกส์
+    function getStarPhysics(sClass, sub, type) {
+        const classMap = { O: 35000, B: 20000, A: 9000, F: 7000, G: 5500, K: 4500, M: 3000 };
+        const nextMap = { O: 30000, B: 10000, A: 7500, F: 6000, G: 5000, K: 3500, M: 2000 };
+        
+        // 1. คำนวณอุณหภูมิ (Interpolation)
+        let t1 = classMap[sClass], t2 = nextMap[sClass];
+        let temp = t1 - (t1 - t2) * (sub / 10);
+        
+        // 2. คำนวณสีตามอุณหภูมิ (RGB Approximation)
+        let color = "";
+        if(temp > 25000) color = "#9bb2ff";
+        else if(temp > 10000) color = "#cad7ff";
+        else if(temp > 7500) color = "#f8f7ff";
+        else if(temp > 6000) color = "#fff4ea";
+        else if(temp > 5000) color = "#fff2a1";
+        else if(temp > 3500) color = "#ffcc6f";
+        else color = "#ff6060";
+
+        // 3. กำหนดขนาดรัศมีตาม Luminosity Class
+        let baseR = 1.0;
+        if(type === "0") baseR = 50;
+        else if(type === "I") baseR = 25;
+        else if(type === "III") baseR = 6;
+        else if(type === "V") baseR = 1.2;
+
+        return { temp, color, radius: baseR, label: `${sClass}${sub} ${type}` };
+    }
+
+    function updatePhysics() {
+        stars.inc = document.getElementById('inc').value;
+        document.getElementById('incVal').innerText = stars.inc;
+        stars.a = getStarPhysics(document.getElementById('classA').value, document.getElementById('subA').value, document.getElementById('typeA').value);
+        stars.b = getStarPhysics(document.getElementById('classB').value, document.getElementById('subB').value, document.getElementById('typeB').value);
+        updateStatic();
+    }
+
+    // Stefan-Boltzmann Light Curve Calculation
+    function calcBrightness(p) {
+        const incRad = stars.inc * Math.PI / 180;
+        const x = Math.cos(p), y = Math.sin(p) * Math.cos(incRad);
+        const d = Math.sqrt(x*x + y*y);
+        
+        // พลังงานรวม (L ~ R^2 * T^4)
+        const L_a = Math.pow(stars.a.radius, 2) * Math.pow(stars.a.temp/5778, 4);
+        const L_b = Math.pow(stars.b.radius, 2) * Math.pow(stars.b.temp/5778, 4);
+        const totalL = L_a + L_b;
+
+        // ระยะบัง (เช็กการเหลื่อมกันของรัศมี)
+        const rA = stars.a.radius * 0.05, rB = stars.b.radius * 0.05;
+        if (d < (rA + rB)) {
+            const overlap = Math.max(0, (rA + rB - d) / (rA + rB));
+            if (Math.sin(p) > 0) return (totalL - (L_b * overlap * 0.8)) / totalL; // A บัง B
+            else return (totalL - (L_a * overlap * 0.8)) / totalL; // B บัง A
+        }
+        return 1.0;
+    }
 
     function animate() {
-        const incRad = config.inc * Math.PI / 180;
-        oCtx.clearRect(0,0,500,300);
-        sCtx.clearRect(0,0,500,300);
-
-        // วาดดาวโคจร
-        const x = Math.cos(phase)*80, y = Math.sin(phase)*80*Math.cos(incRad);
-        oCtx.strokeStyle = "#333";
-        oCtx.beginPath(); oCtx.ellipse(250,120,80,80*Math.cos(incRad),0,0,Math.PI*2); oCtx.stroke();
+        const incRad = stars.inc * Math.PI / 180;
+        oCtx.clearRect(0,0,500,320); sCtx.clearRect(0,0,500,320);
         
-        // วาดดาวแบบง่าย (เพื่อให้รันได้ทุกที่)
-        oCtx.fillStyle = config.colorA; oCtx.beginPath(); oCtx.arc(250+x, 120+y, 15, 0, 7); oCtx.fill();
-        oCtx.fillStyle = config.colorB; oCtx.beginPath(); oCtx.arc(250-x, 120-y, 12, 0, 7); oCtx.fill();
+        const x = Math.cos(phase)*100, y = Math.sin(phase)*100*Math.cos(incRad);
+        
+        // Orbit
+        oCtx.strokeStyle = "#1a2a44"; oCtx.beginPath(); oCtx.ellipse(250,130,100,100*Math.cos(incRad),0,0,Math.PI*2); oCtx.stroke();
+        
+        // Draw Stars (Scale for display)
+        const drawR = (r) => Math.max(5, Math.min(40, r * 3));
+        if(Math.sin(phase) > 0) {
+            drawStar(oCtx, 250-x, 130-y, drawR(stars.b.radius), stars.b.color);
+            drawStar(oCtx, 250+x, 130+y, drawR(stars.a.radius), stars.a.color);
+        } else {
+            drawStar(oCtx, 250+x, 130+y, drawR(stars.a.radius), stars.a.color);
+            drawStar(oCtx, 250-x, 130-y, drawR(stars.b.radius), stars.b.color);
+        }
 
         // Spectroscopy
-        sCtx.fillStyle = "#fff"; sCtx.fillText("← BLUESHIFT", 50, 50);
-        sCtx.fillText("REDSHIFT →", 380, 50);
-        
-        const vA = 30 * Math.sin(incRad) * Math.sin(phase);
-        sCtx.fillStyle = config.colorA; sCtx.fillRect(250+(vA*4), 60, 4, 100);
-        sCtx.fillStyle = config.colorB; sCtx.fillRect(250-(vA*6), 60, 4, 100);
+        const vA = 40 * Math.sin(incRad) * Math.sin(phase);
+        sCtx.fillStyle = stars.a.color; sCtx.fillRect(250+(vA*3), 100, 3, 100);
+        sCtx.fillStyle = stars.b.color; sCtx.fillRect(250-(vA*4), 100, 3, 100);
 
-        // อัปเดตจุดในกราฟ
-        const deg = (phase*180/Math.PI)%360;
-        Plotly.restyle('rv', {x:[[deg],[deg]], y:[[vA],[-vA*1.5]]}, [2,3]);
+        if(window.Plotly) {
+            const deg = (phase*180/Math.PI)%360;
+            Plotly.restyle('rv', {x:[[deg],[deg]], y:[[vA],[-vA*1.2]]}, [2,3]);
+            Plotly.restyle('lc', {x:[[deg]], y:[[calcBrightness(phase)]]}, [1]);
+        }
 
-        phase += 0.03;
+        phase += 0.02;
         requestAnimationFrame(animate);
     }
 
+    function drawStar(ctx, x, y, r, col) {
+        ctx.fillStyle = col; ctx.shadowBlur = 15; ctx.shadowColor = col;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+
     function init() {
-        const layout = { paper_bgcolor:'black', plot_bgcolor:'black', margin:{t:10,b:30,l:30,r:10}, font:{color:'#7fd4ff'} };
-        Plotly.newPlot('lc', [{x:[], y:[], mode:'lines', line:{color:'yellow'}}], layout);
+        const layout = { paper_bgcolor:'black', plot_bgcolor:'#050a18', margin:{t:10,b:30,l:40,r:10}, font:{color:'#7fd4ff', size:10} };
+        Plotly.newPlot('lc', [{x:[], y:[], name:'Flux', line:{color:'yellow'}}, {x:[0], y:[1], mode:'markers', marker:{color:'red'}}], layout);
         Plotly.newPlot('rv', [
-            {x:[], y:[], name:'A', line:{dash:'dot'}},
-            {x:[], y:[], name:'B', line:{dash:'dot'}},
+            {x:[], y:[], name:'RV A', line:{dash:'dot'}}, {x:[], y:[], name:'RV B', line:{dash:'dot'}},
             {x:[0], y:[0], mode:'markers'}, {x:[0], y:[0], mode:'markers'}
         ], layout);
-        updateStatic();
-        animate();
+        
+        // Listeners
+        document.querySelectorAll('input, select').forEach(el => el.oninput = updatePhysics);
+        updatePhysics(); animate();
     }
 
     function updateStatic() {
-        let x=[], yA=[], yB=[];
-        for(let i=0; i<360; i+=5) {
-            x.push(i);
-            yA.push(30 * Math.sin(config.inc*Math.PI/180) * Math.sin(i*Math.PI/180));
-            yB.push(-45 * Math.sin(config.inc*Math.PI/180) * Math.sin(i*Math.PI/180));
+        let x=[], yL=[], yA=[], yB=[];
+        for(let i=0; i<=360; i+=2) {
+            let p = i*Math.PI/180; x.push(i);
+            yL.push(calcBrightness(p));
+            yA.push(40 * Math.sin(stars.inc*Math.PI/180) * Math.sin(p));
+            yB.push(-48 * Math.sin(stars.inc*Math.PI/180) * Math.sin(p));
         }
+        Plotly.restyle('lc', {x:[x], y:[yL]}, [0]);
         Plotly.restyle('rv', {x:[x,x], y:[yA,yB]}, [0,1]);
     }
 
-    init();
+    window.onload = init;
 </script>
 </body>
 </html>
