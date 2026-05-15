@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Star Pro: RV & Light Curve Sync</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body { margin: 0; background: #050816; color: #7fd4ff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; }
+        .dashboard { width: 95%; max-width: 1100px; margin: 20px; background: rgba(20, 30, 60, 0.6); border: 1px solid rgba(127, 212, 255, 0.3); border-radius: 20px; padding: 20px; backdrop-filter: blur(10px); }
+        .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        canvas { width: 100%; background: rgba(0, 0, 0, 0.4); border-radius: 15px; border: 1px solid #1a2a44; }
+        .controls { text-align: center; margin-bottom: 15px; padding: 10px; background: rgba(127, 212, 255, 0.1); border-radius: 10px; }
+        .label { color: #8caed6; font-size: 0.85em; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        h2 { margin: 0 0 10px 0; text-align: center; color: #fff; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <h2>Advanced Binary Analysis Deck</h2>
+    
+    <div class="controls">
+        <label>Inclination: </label>
+        <input type="range" id="incRange" min="0" max="90" value="88" style="width: 250px;">
+        <span id="incValue">88°</span>
+    </div>
+
+    <div class="viz-container">
+        <div>
+            <div class="label">Orbital Dynamics (Limb Darkening Enabled)</div>
+            <canvas id="orbitCanvas" width="500" height="350"></canvas>
+        </div>
+        <div>
+            <div class="label">Spectroscopy & Velocity Readout</div>
+            <canvas id="specCanvas" width="500" height="350"></canvas>
+        </div>
+    </div>
+
+    <div class="label">Synchronized Data Stream (RV & Light Curve)</div>
+    <div id="dataPlot" style="width:100%; height:500px;"></div>
+</div>
+
+<script>
+    const orbitCanvas = document.getElementById('orbitCanvas');
+    const specCanvas = document.getElementById('specCanvas');
+    const incRange = document.getElementById('incRange');
+    const incValue = document.getElementById('incValue');
+    const oCtx = orbitCanvas.getContext('2d');
+    const sCtx = specCanvas.getContext('2d');
+
+    let phase = 0;
+    let inclination = 88;
+    const ampWhite = 35;
+    const ampBlue = 60;
+    const orbitR = 121; // ขยายขึ้น 10% จาก 110 เดิม
+
+    incRange.addEventListener('input', (e) => {
+        inclination = e.target.value;
+        incValue.innerText = inclination + "°";
+        updateStaticData();
+    });
+
+    // Limb Darkened Star Drawing
+    function drawStar(ctx, x, y, r, baseColor, isWhite) {
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        if (isWhite) {
+            g.addColorStop(0, '#ffffff');
+            g.addColorStop(0.6, '#eeeeee');
+            g.addColorStop(1, '#666666'); // Dark edge
+        } else {
+            g.addColorStop(0, '#aaddff');
+            g.addColorStop(0.5, '#66ccff');
+            g.addColorStop(1, '#003366'); // Dark edge
+        }
+        
+        // Outer glow
+        const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 1.5);
+        glow.addColorStop(0, baseColor + "44");
+        glow.addColorStop(1, "transparent");
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(x, y, r * 1.5, 0, Math.PI * 2); ctx.fill();
+
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function drawIndicator(ctx, x, yStart, yEnd, color, velocity) {
+        const overshoot = 20;
+        ctx.strokeStyle = "rgba(0,0,0,0.8)"; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(x, yStart); ctx.lineTo(x, yEnd); ctx.stroke();
+        ctx.strokeStyle = color; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(x, yStart - overshoot); ctx.lineTo(x, yEnd + overshoot); ctx.stroke();
+        ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, yStart - overshoot, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.font = "bold 11px monospace"; ctx.textAlign = "center";
+        ctx.fillStyle = velocity > 0 ? "#ff5555" : (velocity < 0 ? "#55aaff" : "#ffffff");
+        ctx.fillText(`${velocity > 0 ? "+" : ""}${velocity.toFixed(1)} km/s`, x, yEnd + overshoot + 15);
+    }
+
+    function calculateLight(p, incRad) {
+        const x = Math.cos(p);
+        const y = Math.sin(p) * Math.cos(incRad);
+        const distSq = x*x + y*y;
+        const r1 = 0.28, r2 = 0.18; // Star radii
+        let brightness = 1.0;
+
+        if (distSq < (r1 + r2)**2) {
+            const dist = Math.sqrt(distSq);
+            // Limb darkening factor (cosine approximation)
+            const overlap = Math.max(0, (r1 + r2 - dist) / (r1 + r2));
+            const ldFactor = Math.pow(overlap, 1.2); 
+            
+            if (Math.sin(p) > 0) brightness -= 0.15 * ldFactor; // Secondary
+            else brightness -= 0.38 * ldFactor; // Primary
+        }
+        return brightness;
+    }
+
+    function animate() {
+        const incRad = inclination * Math.PI / 180;
+        const cx = orbitCanvas.width / 2;
+        const cy = orbitCanvas.height / 2;
+
+        oCtx.clearRect(0, 0, orbitCanvas.width, orbitCanvas.height);
+        sCtx.clearRect(0, 0, specCanvas.width, specCanvas.height);
+
+        const x = Math.cos(phase) * orbitR;
+        const y = Math.sin(phase) * orbitR * Math.cos(incRad);
+
+        oCtx.strokeStyle = "rgba(255,255,255,0.05)";
+        oCtx.beginPath(); oCtx.ellipse(cx, cy, orbitR, orbitR * Math.cos(incRad), 0, 0, Math.PI * 2); oCtx.stroke();
+
+        if (Math.sin(phase) > 0) {
+            drawStar(oCtx, cx - x, cy - y, 12, "#66ccff", false);
+            drawStar(oCtx, cx + x, cy + y, 22, "#ffffff", true);
+        } else {
+            drawStar(oCtx, cx + x, cy + y, 22, "#ffffff", true);
+            drawStar(oCtx, cx - x, cy - y, 12, "#66ccff", false);
+        }
+
+        const sCenter = specCanvas.width / 2;
+        const barH = 80, barY = 120;
+        const grad = sCtx.createLinearGradient(50, 0, specCanvas.width - 50, 0);
+        grad.addColorStop(0, "#2244ff"); grad.addColorStop(0.5, "#ffffff"); grad.addColorStop(1, "#ff3333");
+        sCtx.fillStyle = grad; sCtx.fillRect(50, barY, specCanvas.width - 100, barH);
+
+        const sinInc = Math.sin(incRad);
+        const vW = ampWhite * sinInc * Math.sin(phase);
+        const vB = -ampBlue * sinInc * Math.sin(phase);
+
+        drawIndicator(sCtx, sCenter + (Math.sin(phase) * 80 * sinInc * 0.5), barY, barY + barH, "#ffffff", vW);
+        drawIndicator(sCtx, sCenter - (Math.sin(phase) * 80 * sinInc), barY, barY + barH, "#66ccff", vB);
+
+        // Update Markers
+        const currLight = calculateLight(phase, incRad);
+        Plotly.restyle('dataPlot', { x: [[phase], [phase], [phase]], y: [[vW], [vB], [currLight]] }, [2, 3, 5]);
+
+        phase = (phase + 0.025) % (2 * Math.PI);
+        requestAnimationFrame(animate);
+    }
+
+    function initPlot() {
+        const xV = []; for (let i = 0; i <= 100; i++) xV.push((i / 100) * 2 * Math.PI);
+        const layout = {
+            paper_bgcolor: 'transparent', plot_bgcolor: 'rgba(0,0,0,0.2)',
+            margin: { t: 20, b: 40, l: 60, r: 20 },
+            xaxis: { gridcolor: '#222', range: [0, 2*Math.PI], tickvals: [0, Math.PI, 2*Math.PI], ticktext: ['0', 'π', '2π'] },
+            yaxis: { gridcolor: '#222', domain: [0.6, 1], title: 'RV (km/s)' },
+            yaxis2: { gridcolor: '#222', domain: [0, 0.4], title: 'Brightness', range: [0.55, 1.05] },
+            font: { color: '#7fd4ff' }, showlegend: false
+        };
+
+        const traces = [
+            { x: xV, y: [], mode: 'lines', line: { color: 'rgba(255,255,255,0.2)' } },
+            { x: xV, y: [], mode: 'lines', line: { color: 'rgba(102,204,255,0.2)' } },
+            { x: [0], y: [0], mode: 'markers', marker: { color: '#fff', size: 10 } },
+            { x: [0], y: [0], mode: 'markers', marker: { color: '#66ccff', size: 10 } },
+            { x: xV, y: [], mode: 'lines', yaxis: 'yaxis2', line: { color: '#ffcc00' } },
+            { x: [0], y: [1], mode: 'markers', yaxis: 'yaxis2', marker: { color: '#ff3300', size: 8 } }
+        ];
+
+        Plotly.newPlot('dataPlot', traces, layout);
+        updateStaticData();
+    }
+
+    function updateStaticData() {
+        const yW = [], yB = [], yL = [], xV = [];
+        const incRad = inclination * Math.PI / 180;
+        const sinInc = Math.sin(incRad);
+        for (let i = 0; i <= 100; i++) {
+            let p = (i / 100) * 2 * Math.PI;
+            xV.push(p);
+            yW.push(ampWhite * sinInc * Math.sin(p));
+            yB.push(-ampBlue * sinInc * Math.sin(p));
+            yL.push(calculateLight(p, incRad));
+        }
+        Plotly.restyle('dataPlot', { y: [yW, yB, null, null, yL] }, [0, 1, 2, 3, 4]);
+    }
+
+    initPlot();
+    animate();
+</script>
+
+</body>
+</html>
