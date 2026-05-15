@@ -184,13 +184,12 @@
         
         sCtx.font = "bold 14px monospace";
         sCtx.textAlign = "left";
-        
-        sCtx.fillStyle = "#ffffff";
-        sCtx.fillText(`White Star (Less Luminous): ${vW > 0 ? "+" : ""}${vW.toFixed(2)} km/s`, boardX + paddingLeft, boardY + 22);
-        
-        sCtx.fillStyle = "#66ccff";
-        sCtx.fillText(`Blue Star (More Luminous): ${vB > 0 ? "+" : ""}${vB.toFixed(2)} km/s`, boardX + paddingLeft, boardY + 45);
 
+        sCtx.fillStyle = "#66ccff";
+        sCtx.fillText(`Blue Star (More Luminous/Primary): ${vB > 0 ? "+" : ""}${vB.toFixed(2)} km/s`, boardX + paddingLeft, boardY + 22);
+        sCtx.fillStyle = "#ffffff";
+        sCtx.fillText(`White Star (Less Luminous/Secondary): ${vW > 0 ? "+" : ""}${vW.toFixed(2)} km/s`, boardX + paddingLeft, boardY + 45);
+    
         const phaseDeg = (phase * 180 / Math.PI);
         const currLight = calculateLight(phase, incRad);
         Plotly.restyle('rvPlot', { x: [[phaseDeg], [phaseDeg]], y: [[vW], [vB]] }, [2, 3]);
