@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NARIT IS RITTANAN | Astronomy Portfolio</title>
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+        font-family: Arial, sans-serif;
+        background: radial-gradient(circle at top, #102040 0%, #050816 45%, #000000 100%);
+        color: white;
+        overflow-x: hidden;
+    }
+
+    /* ---------------- HERO ---------------- */
+    .hero {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    .hero h1 {
+        font-size: 72px;
+        letter-spacing: 4px;
+        color: #7fd4ff;
+        text-shadow: 0 0 10px #4cc9ff, 0 0 30px #4cc9ff;
+    }
+    .hero p {
+        margin-top: 20px;
+        font-size: 22px;
+        color: #cbdfff;
+        width: 70%;
+        line-height: 1.6;
+    }
+
+    /* ---------------- SECTION ---------------- */
+    .section { padding: 80px 10%; }
+    .section h2 { font-size: 40px; color: #7fd4ff; margin-bottom: 40px; text-align: center; }
+
+    .inclination-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 40px;
+        text-align: center;
+    }
+    .system-box {
+        background: rgba(20, 30, 60, 0.4);
+        padding: 20px;
+        border-radius: 20px;
+        border: 1px solid rgba(100, 180, 255, 0.2);
+    }
+    .system-box h3 { color: #7fd4ff; margin-bottom: 10px; }
+    .system-box canvas { width: 100%; height: auto; display: block; margin: 0 auto; }
+
+    /* ---------------- STARS ---------------- */
+    .stars { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; }
+    .star { position: absolute; background: white; border-radius: 50%; animation: twinkle 4s infinite alternate; }
+    @keyframes twinkle { from { opacity: 0.2; } to { opacity: 1; } }
+
+    footer { text-align: center; padding: 40px; color: #8caed6; }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<section class="hero">
+    <h1>NARIT IS RITTANAN</h1>
+    <p>Astronomy Portfolio • Binary Stars • Doppler Spectroscopy • Inclination Studies</p>
+</section>
+
+<!-- COMBINED SECTION: ORBIT + SPECTROSCOPY -->
+<section class="section">
+    <h2>System Dynamics & Doppler Spectroscopy</h2>
+    <div class="inclination-grid">
+        
+        <!-- 10 DEGREES -->
+        <div class="system-box">
+            <h3>10° (Near Face-On)</h3>
+            <canvas id="inc10" width="400" height="300"></canvas>
+            <canvas id="spec10" width="360" height="220"></canvas>
+            <p style="color:#8caed6; font-size: 14px; margin-top:10px;">Narrow Radial Velocity Range</p>
+        </div>
+
+        <!-- 45 DEGREES -->
+        <div class="system-box">
+            <h3>45° (Intermediate)</h3>
+            <canvas id="inc45" width="400" height="300"></canvas>
+            <canvas id="spec45" width="360" height="220"></canvas>
+            <p style="color:#8caed6; font-size: 14px; margin-top:10px;">Moderate Doppler Shift</p>
+        </div>
+
+        <!-- 90 DEGREES -->
+        <div class="system-box">
+            <h3>90° (Edge-On)</h3>
+            <canvas id="inc90" width="400" height="300"></canvas>
+            <canvas id="spec90" width="360" height="220"></canvas>
+            <p style="color:#8caed6; font-size: 14px; margin-top:10px;">Maximum Doppler Shift</p>
+        </div>
+
+    </div>
+</section>
+
+<section class="section">
+    <h2>Radial Velocity Curves</h2>
+    <div id="rvcurve" style="width:100%; height:500px;"></div>
+</section>
+
+<footer>
+    © 2026 Pakawee Astronomy Portfolio
+</footer>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<script>
+/* ---------- BACKGROUND STARS ---------- */
+const starsContainer = document.getElementById("stars");
+for(let i=0; i<200; i++) {
+    const star = document.createElement("div");
+    star.className = "star";
+    star.style.width = star.style.height = Math.random()*3 + "px";
+    star.style.left = Math.random()*100 + "%";
+    star.style.top = Math.random()*100 + "%";
+    star.style.animationDuration = (Math.random()*5+2) + "s";
+    starsContainer.appendChild(star);
+}
+
+/* ---------- SHARED STATE ---------- */
+let phaseAngle = 0;
+const systems = [
+    { inc: 10, orbitId: "inc10", specId: "spec10" },
+    { inc: 45, orbitId: "inc45", specId: "spec45" },
+    { inc: 90, orbitId: "inc90", specId: "spec90" }
+];
+
+/* ---------- DRAWING FUNCTIONS ---------- */
+function glow(ctx, x, y, r, color) {
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r*3);
+    g.addColorStop(0, color);
+    g.addColorStop(1, "transparent");
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, r*3, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+}
+
+function drawOrbit(ctx, canvas, incDeg) {
+    const inc = incDeg * Math.PI / 180;
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const orbitR = 80;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const x = Math.cos(phaseAngle) * orbitR;
+    const y = Math.sin(phaseAngle) * orbitR * Math.cos(inc);
+
+    // Orbit Line
+    ctx.strokeStyle = "rgba(255,255,255,0.1)";
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, orbitR, orbitR * Math.cos(inc), 0, 0, Math.PI*2);
+    ctx.stroke();
+
+    // Stars (Simple depth sorting)
+    if (y > 0) {
+        glow(ctx, cx - x, cy - y, 12, "#66ccff"); // Blue
+        glow(ctx, cx + x, cy + y, 20, "#ffffff"); // White
+    } else {
+        glow(ctx, cx + x, cy + y, 20, "#ffffff");
+        glow(ctx, cx - x, cy - y, 12, "#66ccff");
+    }
+}
+
+function drawSpectrum(ctx, canvas, incDeg) {
+    const inc = incDeg * Math.PI / 180;
+    const center = canvas.width / 2;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Spectrum Gradient Background
+    const grad = ctx.createLinearGradient(40, 0, canvas.width - 40, 0);
+    grad.addColorStop(0, "#2244ff"); grad.addColorStop(0.5, "#ffffff"); grad.addColorStop(1, "#ff3333");
+    ctx.fillStyle = grad;
+    ctx.fillRect(40, 80, canvas.width - 80, 60);
+
+    // Shift Calculation
+    const amp = 50 * Math.sin(inc);
+    const shift = Math.sin(phaseAngle) * amp;
+
+    // White Star Line
+    const wX = center + (shift * 0.6);
+    ctx.strokeStyle = "white"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(wX, 70); ctx.lineTo(wX, 150); ctx.stroke();
+
+    // Blue Star Line
+    const bX = center - shift;
+    ctx.strokeStyle = "#66ccff"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(bX, 70); ctx.lineTo(bX, 150); ctx.stroke();
+    
+    ctx.fillStyle = "#dcecff"; ctx.font = "12px Arial";
+    ctx.fillText("Blueshift", 40, 165);
+    ctx.fillText("Redshift", canvas.width - 90, 165);
+}
+
+function animate() {
+    systems.forEach(s => {
+        const oCanvas = document.getElementById(s.orbitId);
+        const sCanvas = document.getElementById(s.specId);
+        drawOrbit(oCanvas.getContext("2d"), oCanvas, s.inc);
+        drawSpectrum(sCanvas.getContext("2d"), sCanvas, s.inc);
+    });
+    phaseAngle += 0.02;
+    requestAnimationFrame(animate);
+}
+
+/* ---------- PLOTLY: RV CURVES ---------- */
+function initPlot() {
+    const rvPhase = [];
+    const white10 = [], blue10 = [];
+    const white45 = [], blue45 = [];
+    const white90 = [], blue90 = [];
+
+    for(let i=0; i<=100; i++) {
+        let p = i/50; 
+        let theta = p * Math.PI;
+        rvPhase.push(p);
+
+        const s10 = Math.sin(10 * Math.PI/180);
+        const s45 = Math.sin(45 * Math.PI/180);
+        const s90 = Math.sin(90 * Math.PI/180);
+
+        white10.push(-30 * s10 * Math.sin(theta)); blue10.push(50 * s10 * Math.sin(theta));
+        white45.push(-30 * s45 * Math.sin(theta)); blue45.push(50 * s45 * Math.sin(theta));
+        white90.push(-30 * s90 * Math.sin(theta)); blue90.push(50 * s90 * Math.sin(theta));
+    }
+
+    const traces = [
+        { x: rvPhase, y: white10, name: 'White (10°)', line: {color: '#fff', dash: 'dot'} },
+        { x: rvPhase, y: blue10, name: 'Blue (10°)', line: {color: '#66ccff', dash: 'dot'} },
+        { x: rvPhase, y: white90, name: 'White (90°)', line: {color: '#fff', width: 4} },
+        { x: rvPhase, y: blue90, name: 'Blue (90°)', line: {color: '#66ccff', width: 4} }
+    ];
+
+    const layout = {
+        paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
+        font: { color: '#dcecff' },
+        xaxis: { title: 'Orbital Phase', gridcolor: '#333' },
+        yaxis: { title: 'Radial Velocity (km/s)', gridcolor: '#333' },
+        margin: { t: 20 }
+    };
+
+    Plotly.newPlot('rvcurve', traces, layout);
+}
+
+initPlot();
+animate();
+</script>
+</body>
+</html>
