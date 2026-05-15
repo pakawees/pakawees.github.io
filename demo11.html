@@ -180,11 +180,11 @@
         sCtx.fill();
         
         sCtx.font = "bold 14px monospace";
-        sCtx.textAlign = "center";
-        sCtx.fillStyle = "#ffffff";
-        sCtx.fillText(`White Star (Primary):   ${vW > 0 ? "+" : ""}${vW.toFixed(2)} km/s`, sCenter, boardY + 22);
+        sCtx.textAlign = "left";
         sCtx.fillStyle = "#66ccff";
-        sCtx.fillText(`Blue Star (Secondary): ${vB > 0 ? "+" : ""}${vB.toFixed(2)} km/s`, sCenter, boardY + 45);
+        sCtx.fillText(`Blue Star (Primary; More Luminous): ${vB > 0 ? "+" : ""}${vB.toFixed(2)} km/s`, sCenter, boardY + 22);
+        sCtx.fillStyle = "#ffffff";
+        sCtx.fillText(`White Star (Secondary; Less Luminous):   ${vW > 0 ? "+" : ""}${vW.toFixed(2)} km/s`, sCenter, boardY + 45);
 
         const phaseDeg = (phase * 180 / Math.PI);
         const currLight = calculateLight(phase, incRad);
