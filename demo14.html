@@ -1,24 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Binary Star Custom Lab (Fixed)</title>
+    <title>Binary Star Lab - demo14</title>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <style>
         body { margin: 0; background: #050a18; color: #7fd4ff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; }
         .dashboard { width: 98%; max-width: 1300px; margin: 20px; background: #0a1128; border: 1px solid rgba(127, 212, 255, 0.2); border-radius: 15px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
         .header { text-align: center; margin-bottom: 20px; color: #fff; text-transform: uppercase; letter-spacing: 2px; }
-        
         .master-controls { display: grid; grid-template-columns: 1fr 1.5fr 1.5fr; gap: 15px; background: rgba(127, 212, 255, 0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(127, 212, 255, 0.1); }
         .control-group { display: flex; flex-direction: column; gap: 8px; border-right: 1px solid rgba(127, 212, 255, 0.1); padding: 0 10px; }
         .control-group:last-child { border-right: none; }
         .control-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.85em; }
-        
         .viz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .label { color: #5da9ff; font-size: 0.75em; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
         canvas { width: 100%; background: #00040a; border-radius: 10px; border: 1px solid #1a2a44; }
         .plot-container { height: 300px; background: #00040a; border-radius: 10px; border: 1px solid #1a2a44; }
-        
         input[type=number], input[type=text] { background: #1a2a44; border: 1px solid #7fd4ff; color: #fff; padding: 3px; border-radius: 4px; width: 70px; }
         input[type=color] { background: none; border: none; width: 40px; height: 30px; cursor: pointer; }
         input[type=range] { flex-grow: 1; cursor: pointer; }
@@ -27,7 +24,7 @@
 <body>
 
 <div class="dashboard">
-    <div class="header"><h2>Binary Star Custom Lab</h2></div>
+    <div class="header"><h2>Binary Star Custom Lab (demo14)</h2></div>
 
     <div class="master-controls">
         <div class="control-group">
@@ -90,7 +87,6 @@
     const oCtx = oCanvas.getContext('2d');
     const sCtx = sCanvas.getContext('2d');
 
-    // State Configuration
     let phase = 0;
     let config = {
         inc: 88,
@@ -98,7 +94,6 @@
         starB: { color: "#66ccff", radius: 5.0, temp: 22000, type: "B1.7 V" }
     };
 
-    // Control Listeners
     function syncValue(idRange, idInput, key, subKey) {
         const r = document.getElementById(idRange);
         const i = document.getElementById(idInput);
@@ -129,7 +124,6 @@
         halo.addColorStop(0, baseColor + "66"); halo.addColorStop(1, "transparent");
         ctx.fillStyle = halo; ctx.globalCompositeOperation = 'screen';
         ctx.beginPath(); ctx.arc(x, y, drawR * 3, 0, Math.PI * 2); ctx.fill();
-        
         ctx.globalCompositeOperation = 'source-over';
         const body = ctx.createRadialGradient(x - drawR*0.3, y - drawR*0.3, 0, x, y, drawR);
         body.addColorStop(0, "#fff"); body.addColorStop(0.3, baseColor); body.addColorStop(1, "#000");
@@ -142,15 +136,11 @@
         const dist = Math.sqrt(x*x + y*y);
         const r1 = config.starA.radius * 0.05, r2 = config.starB.radius * 0.05;
         let brightness = 1.0;
-
         if (dist < (r1 + r2)) {
             const overlap = Math.max(0, (r1 + r2 - dist) / (r1 + r2));
             const tA = config.starA.temp, tB = config.starB.temp;
-            if (Math.sin(p) > 0) { // Star A in front of Star B
-                brightness -= (tB / (tA + tB)) * 0.7 * Math.pow(overlap, 1.2);
-            } else { // Star B in front of Star A
-                brightness -= (tA / (tA + tB)) * 0.7 * Math.pow(overlap, 1.2);
-            }
+            if (Math.sin(p) > 0) { brightness -= (tB / (tA + tB)) * 0.7 * Math.pow(overlap, 1.2); }
+            else { brightness -= (tA / (tA + tB)) * 0.7 * Math.pow(overlap, 1.2); }
         }
         return brightness;
     }
@@ -160,14 +150,9 @@
         const cx = oCanvas.width / 2, cy = 130;
         oCtx.clearRect(0, 0, oCanvas.width, oCanvas.height);
         sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
-
         const x = Math.cos(phase) * 100, y = Math.sin(phase) * 100 * Math.cos(incRad);
-        
-        // Orbit Path
         oCtx.strokeStyle = "rgba(127, 212, 255, 0.1)";
         oCtx.beginPath(); oCtx.ellipse(cx, cy, 100, 100 * Math.cos(incRad), 0, 0, Math.PI * 2); oCtx.stroke();
-
-        // Stars Layering
         if (Math.sin(phase) > 0) {
             drawStar(oCtx, cx - x, cy - y, config.starB.radius, config.starB.color);
             drawStar(oCtx, cx + x, cy + y, config.starA.radius, config.starA.color);
@@ -175,8 +160,6 @@
             drawStar(oCtx, cx + x, cy + y, config.starA.radius, config.starA.color);
             drawStar(oCtx, cx - x, cy - y, config.starB.radius, config.starB.color);
         }
-
-        // Info Display
         const drawInfo = (offX, s) => {
             oCtx.fillStyle = "rgba(0,0,0,0.5)"; oCtx.fillRect(cx + offX, 260, 200, 110);
             oCtx.strokeStyle = s.color; oCtx.strokeRect(cx + offX, 260, 200, 110);
@@ -186,20 +169,15 @@
             oCtx.fillText(`Temp: ${s.temp} K`, cx + offX + 15, 335);
         };
         drawInfo(-210, config.starA); drawInfo(10, config.starB);
-
-        // Spectroscopy Bar
         const barX = 75, barW = 400;
         const grad = sCtx.createLinearGradient(barX, 0, barX + barW, 0);
         grad.addColorStop(0, "#00f"); grad.addColorStop(0.5, "#fff"); grad.addColorStop(1, "#f00");
         sCtx.fillStyle = grad; sCtx.fillRect(barX, 100, barW, 80);
-
         sCtx.font = "bold 13px Arial";
         sCtx.textAlign = "left"; sCtx.fillStyle = "#66ccff"; sCtx.fillText("← BLUESHIFT (Toward)", barX, 85);
         sCtx.textAlign = "right"; sCtx.fillStyle = "#ff4d4d"; sCtx.fillText("REDSHIFT (Away) →", barX + barW, 85);
-
         const vA = 35 * Math.sin(incRad) * Math.sin(phase);
         const vB = -60 * Math.sin(incRad) * Math.sin(phase);
-
         const drawIndicator = (vel, color, label) => {
             const ix = (sCanvas.width/2) + (vel * 3);
             sCtx.strokeStyle = color; sCtx.lineWidth = 3;
@@ -210,12 +188,9 @@
         };
         drawIndicator(vA, config.starA.color, "Star A");
         drawIndicator(vB, config.starB.color, "Star B");
-
-        // Update Plots
         const phaseDeg = (phase * 180 / Math.PI) % 360;
         Plotly.restyle('rvPlot', { x: [[phaseDeg], [phaseDeg]], y: [[vA], [vB]] }, [2, 3]);
         Plotly.restyle('lcPlot', { x: [[phaseDeg]], y: [[calculateLight(phase, incRad)]] }, [1]);
-
         phase = (phase + 0.02) % (Math.PI * 2);
         requestAnimationFrame(animate);
     }
@@ -228,14 +203,33 @@
             yaxis: { gridcolor: '#1a2a44', color: '#7fd4ff', fixedrange: true },
             showlegend: true, legend: { font: { color: '#7fd4ff', size: 10 } }
         };
-
         Plotly.newPlot('lcPlot', [
             { x: [], y: [], mode: 'lines', line: { color: '#ffcc00' }, name: 'Total Flux' },
             { x: [0], y: [1], mode: 'markers', marker: { color: '#f40', size: 10 }, name: 'Current' }
         ], { ...layout, showlegend: false, yaxis: { ...layout.yaxis, range: [0.2, 1.1] } });
-
         Plotly.newPlot('rvPlot', [
             { x: [], y: [], name: 'Star A', line: { color: 'rgba(255,255,255,0.2)', dash: 'dot' } },
             { x: [], y: [], name: 'Star B', line: { color: 'rgba(102,204,255,0.2)', dash: 'dot' } },
             { x: [0], y: [0], mode: 'markers', marker: {size: 8}, name: 'RV A' },
-            { x: [0], y: [0], mode: 'markers', marker: {
+            { x: [0], y: [0], mode: 'markers', marker: {size: 8}, name: 'RV B' }
+        ], { ...layout, yaxis: { ...layout.yaxis, range: [-80, 80] } });
+        updateStaticPlots();
+    }
+
+    function updateStaticPlots() {
+        let x = [], yL = [], yA = [], yB = [];
+        const incRad = config.inc * Math.PI / 180;
+        for(let i=0; i<=360; i+=2) {
+            let p = i * Math.PI / 180; x.push(i);
+            yL.push(calculateLight(p, incRad));
+            yA.push(35 * Math.sin(incRad) * Math.sin(p));
+            yB.push(-60 * Math.sin(incRad) * Math.sin(p));
+        }
+        Plotly.restyle('lcPlot', { x: [x], y: [yL] }, [0]);
+        Plotly.restyle('rvPlot', { x: [x, x], y: [yA, yB] }, [0, 1]);
+    }
+
+    initPlots(); animate();
+</script>
+</body>
+</html>
